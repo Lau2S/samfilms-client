@@ -1,0 +1,46 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0a0a0f;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+// Asegurar que main ocupe todo el espacio
+main {
+  min-height: 100vh;
+  padding-top: 0; // El navbar es fixed, no necesita padding
+}
+
+// Smooth scrolling
+html {
+  scroll-behavior: smooth;
+}
+
+// Estilos para enlaces globales
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+// Estilos para botones globales
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  
+  &:focus-visible {
+    outline: 2px solid #8b5cf6;
+    outline-offset: 2px;
+  }
+}

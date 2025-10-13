@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import HomePage from "../pages/home/HomePage";
 import AboutPage from "../pages/about/AboutPage";
+import LoginPage from "../pages/login/LoginPage";
+// import RegistroPage from "../pages/registro/RegistroPage";
 import LayoutSamFilms from "../layout/LayoutSamFilms";
 /**
  * Top-level route configuration for the CrunchyEISC app.
@@ -20,6 +22,8 @@ const RoutesSamFilms = () => {
           {/* <Route path="/peliculas" element={<MoviePage />} /> */}
           <Route path="/sobre-nosotros" element={<AboutPage />} />
           {/* <Route path="/mapa-sitio" element={<SiteMap />} /> */}
+          <Route path="/inicio-sesion" element={<LoginPage />} />
+          {/* <Route path="/registro" element={<RegistroPage />} /> */}
         </Routes>
       </LayoutSamFilms>
     </BrowserRouter>

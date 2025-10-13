@@ -1,7 +1,8 @@
 import React from "react";
 import Navbar from "../components/navbar/Navbar";
 import Footer from "../components/footer/Footer";
-import "./LayoutSamFilms.css";
+import "./LayoutSamFilms.scss";
+import { Outlet } from "react-router";
 
 /**
  * Props accepted by {@link LayoutCrunchyEISC}.
@@ -26,7 +27,10 @@ const LayoutSamFilms: React.FC<LayoutSamFilmsProps> = ({ children }) => {
   return (
     <>
       <Navbar />
-      <main>{children}</main>
+      <main>
+        <Outlet />
+        {children}
+      </main>
       <Footer />
     </>
   );

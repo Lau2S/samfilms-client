@@ -1,0 +1,151 @@
+$color-primary: #8b5cf6; // Morado del botón y navbar
+$color-secondary: #743a9b; // Color secundario
+$color-bg-dark: #0a0a0f; // Fondo oscuro
+$color-text-white: #ffffff;
+$color-overlay: rgba(10, 10, 15, 0.75); // Overlay semi-transparente
+
+// Variables de espaciado
+$spacing-sm: 1rem;
+$spacing-md: 2rem;
+$spacing-lg: 3rem;
+
+// Mixins reutilizables
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin text-shadow {
+  text-shadow: 2px 4px 12px rgba(0, 0, 0, 0.8);
+}
+
+// Estilos del componente HomePage
+.home-page {
+  width: 100%;
+  min-height: 100vh;
+  
+  .hero-section {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    scroll-margin-top: 100px;
+    padding-top: 6rem;
+    @include flex-center;
+    
+    // Fondo con imagen borrosa de películas
+    background-image: url('/public/fondo.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    // Overlay oscuro semi-transparente
+    .hero-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(10, 10, 15, 0.6) 0%,
+        rgba(10, 10, 15, 0.85) 100%
+      );
+      z-index: 1;
+    }
+    
+    // Contenido del hero (texto y botón)
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 $spacing-md;
+      max-width: 1300px;
+      
+      .hero-title {
+        font-size: clamp(2.5rem, 6vw, 5rem);
+        font-weight: 700;
+        color: $color-text-white;
+        margin-bottom: $spacing-md;
+        line-height: 1.2;
+        @include text-shadow;
+        
+        // Animación de entrada
+        animation: fadeInUp 0.8s ease-out;
+      }
+      
+      .hero-subtitle {
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: $spacing-lg;
+        line-height: 1.6;
+        @include text-shadow;
+        
+        // Animación de entrada con delay
+        animation: fadeInUp 0.8s ease-out 0.2s backwards;
+      }
+      
+      .cta-button {
+        background: linear-gradient(
+            to right,
+            $color-secondary,
+            $color-primary
+            );
+        color: $color-text-white;
+        font-size: 1.125rem;
+        font-weight: 600;
+        padding: 1rem 3rem;
+        margin-bottom: 3rem;
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        
+        // Animación de entrada con delay
+        animation: fadeInUp 0.8s ease-out 0.4s backwards;
+        
+        &:hover {
+          background-color: lighten($color-primary, 5%);
+          transform: translateY(-2px);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+}
+
+// Animaciones
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .home-page {
+    .hero-section {
+      height: 100vh;
+      
+      .hero-content {
+        .hero-subtitle br {
+          display: none; // Remueve los saltos de línea en móvil
+        }
+        
+        .cta-button {
+          padding: 0.875rem 2.5rem;
+          font-size: 1rem;
+        }
+      }
+    }
+  }
+}

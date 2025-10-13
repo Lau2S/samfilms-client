@@ -1,5 +1,5 @@
 import React from "react";
-import "./AboutPage.css";
+import "./AboutPage.scss";
 
 /**
  * About page describing the CrunchyEISC team and purpose.

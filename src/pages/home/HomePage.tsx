@@ -1,5 +1,5 @@
 import React from "react";
-import "./HomePage.css";
+import "./HomePage.scss";
 import { useNavigate } from "react-router";
 
 /**
@@ -12,13 +12,27 @@ import { useNavigate } from "react-router";
  * <HomePage />
  */
 const HomePage: React.FC = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   return (
-    <div>
-      <h1>SamFilms</h1>
-      <h2>Disfruta de las mejores peliculas aqui</h2>
-      <button onClick={() => navigate("peliculas")}>Ver peliculas</button>
+    <div className="home-page">
+      {/* Hero Section con fondo borroso de películas */}
+      <section className="hero-section">
+        <div className="hero-overlay"></div>
+        <div className="hero-content">
+          <h1 className="hero-title">
+            Tu entretenimiento
+            <br />
+            sin límites
+          </h1>
+          <p className="hero-subtitle">
+            Disfruta de películas y series gratis en cualquier lugar, en todos tus
+            <br />
+            dispositivos y sin anuncios
+          </p>
+          <button className="cta-button">Comenzar</button>
+        </div>
+      </section>
     </div>
   );
 };

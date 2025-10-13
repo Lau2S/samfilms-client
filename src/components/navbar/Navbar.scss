@@ -1,0 +1,131 @@
+$color-primary: #8b5cf6;
+$color-secondary: #743a9b;
+$color-bg-dark: #0a0a0f;
+$color-text-white: #ffffff;
+
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 4rem;
+  background: rgba(10, 10, 15, 0.2);
+  backdrop-filter: blur(10px);
+  
+.nav-logo {
+    height: 40px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+  
+  // Navigation links container
+  .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      align-items: center;
+
+      
+      // Individual links
+      a {
+          color: rgba(255, 255, 255, 0.8);
+          text-decoration: none;
+          font-weight: 400;
+          transition: color 0.3s ease;
+          position: relative;
+
+          &::after {
+              content: '';
+              position: absolute;
+              bottom: -4px;
+              left: 0;
+              width: 0;
+              height: 2px;
+              background-color: $color-primary;
+              transition: width 0.3s ease;
+          }
+
+          &:hover {
+              color: $color-text-white;
+
+              &::after {
+                  width: 100%;
+              }
+          }
+      }
+
+  }
+  
+  // Botones de autenticación
+  .auth-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-left: 2rem;
+    
+    button {
+      padding: 0.625rem 1.5rem;
+      border-radius: 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      
+      &.btn-register {
+        background: transparent;
+        color: $color-text-white;
+        border: 2px solid $color-primary;
+        
+        &:hover {
+          background: $color-primary;
+          transform: translateY(-2px);
+        }
+      }
+      
+      &.btn-login {
+        background: $color-primary;
+        color: $color-text-white;
+        border: 2px solid $color-primary;
+        
+        &:hover {
+          background: lighten($color-primary, 10%);
+          border-color: lighten($color-primary, 10%);
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  nav {
+    padding: 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  nav {
+    padding: 1rem 1.5rem;
+    flex-wrap: wrap;
+    
+    .nav-links {
+      gap: 1.5rem;
+      order: 3;
+      width: 100%;
+      margin-top: 1rem;
+      justify-content: center;
+    }
+    
+    .auth-buttons {
+      margin-left: auto;
+      
+      button {
+        padding: 0.5rem 1.25rem;
+        font-size: 0.875rem;
+      }
+    }
+  }
+}

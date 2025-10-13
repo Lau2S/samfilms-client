@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router";
-import "./Footer.css";
+import "./Footer.scss";
 
 /**
  * Application footer with a quick link to the site map.
@@ -11,6 +11,7 @@ import "./Footer.css";
 const Footer: React.FC = () => {
   return (
     <footer>
+      <p>©2025 SamFilms. Todos los derechos reservados.</p>
       <Link to="/mapa-sitio">Mapa del Sitio</Link>
     </footer>
   );
