@@ -1,138 +1,50 @@
 import React, { useState } from 'react';
 import './ProfilePage.scss';
 import { useNavigate } from 'react-router';
-import { useEffect } from 'react';
+
 const ProfilePage: React.FC = () => {
     const navigate = useNavigate();
 
     // example user (replace with real data or fetch from context)
-    const [user, setUser] = useState<any>(null);
-
-useEffect(() => {
-  const fetchProfile = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) return; // si no hay token, no puede obtener el perfil
-
-    try {
-      const res = await fetch('https://movie-platform-back.onrender.com/api/v1/users/me', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-      if (res.ok && data.user) {
-        setUser(data.user);
-      } else {
-        console.error('Error al obtener perfil:', data);
-      }
-    } catch (err) {
-      console.error('Error de conexión:', err);
-    }
-  };
-
-  fetchProfile();
-}, []);
-
+    const user = {
+        name: 'Juan Pérez',
+        email: 'juanperez@example.com',
+        age: 28,
+        favoriteGenres: ['Acción', 'Comedia', 'Drama'],
+    };
 
     // modal states
     const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
 
     // edit form state
-    const [name, setName] = useState('');
-const [email, setEmail] = useState('');
-const [age, setAge] = useState('');
+    const [name, setName] = useState(user.name);
+    const [email, setEmail] = useState(user.email);
+    const [age, setAge] = useState(String(user.age));
 
-useEffect(() => {
-  if (user) {
-    setName(user.user_metadata?.nombres || '');
-    setEmail(user.email || '');
-    setAge(user.user_metadata?.edad || '');
-  }
-}, [user]);
+    const handleSave = () => {
+        // Aquí iría la llamada al backend para guardar cambios
+        console.log('Guardando perfil', { name, email, age });
+        setEditOpen(false);
+    };
 
-    const handleSave = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) return;
-
-  const body = {
-    nombres: name,
-    edad: age,
-    email,
-  };
-
-  try {
-    const res = await fetch('https://movie-platform-back.onrender.com/api/v1/users/me', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      alert('Perfil actualizado correctamente');
-      setUser(data.data);
-      setEditOpen(false);
-    } else {
-      alert(data.message_es || 'Error al actualizar perfil');
-    }
-  } catch (err) {
-    console.error('Error al actualizar perfil:', err);
-  }
-};
-
-
-    const handleConfirmDelete = async () => {
-  const token = localStorage.getItem('token');
-  if (!token) return;
-
-  const confirmText = prompt('Escribe "ELIMINAR" para confirmar:');
-  if (confirmText !== 'ELIMINAR') {
-    alert('Debes escribir ELIMINAR para confirmar');
-    return;
-  }
-
-  try {
-    const res = await fetch('https://movie-platform-back.onrender.com/api/v1/users/me', {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ password: '', confirmText }),
-    });
-
-    if (res.status === 204) {
-      alert('Cuenta eliminada correctamente');
-      localStorage.clear();
-      navigate('/');
-    } else {
-      const data = await res.json();
-      alert(data.message_es || 'Error al eliminar cuenta');
-    }
-  } catch (err) {
-    console.error('Error al eliminar cuenta:', err);
-  }
-};
-if (!user) {
-  return <div className="loading">Cargando perfil...</div>;
-}
-
+    const handleConfirmDelete = () => {
+        // Aquí iría la lógica para eliminar la cuenta (llamada al backend)
+        console.log('Eliminar cuenta para', user.email);
+        // limpiar token y redirigir al home
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/');
+    };
 
     return (
-        
         <div className="profile-page">
             <div className="profile-header">
-            <div className="profile-avatar">
-             <span className="avatar-icon">👤</span>
-             </div>
-             <h2 className="profile-name">{user.name}</h2>
-             </div>
-
+                <div className="profile-avatar">
+                    <span className="avatar-icon">👤</span>
+                </div>
+                <h2 className="profile-name">{user.name}</h2>
+            </div>
 
             <div className="profile-details">
                 <p><strong>Email:</strong> {user.email}</p>
