@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import "./RegisterPage.scss";
 
+
 /**
  * Register page with user registration form.
  *
@@ -29,7 +30,7 @@ const RegisterPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     
     // Validación básica de contraseñas
@@ -39,6 +40,38 @@ const RegisterPage: React.FC = () => {
     }
     
     // Aquí irá la lógica de registro
+    const url: string = "http://localhost:3000/api/v1/users/register";
+    try {
+      const response = await fetch(url, {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          nombres: formData.nombre,
+          apellidos: formData.apellido,
+          edad: formData.edad,
+          correo: formData.email,
+          contrasena: formData.password,
+        }) 
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      const result = await response.json();
+      console.log("respuesta del servidor",result)
+      if (result.success) {
+        alert("registro exitoso")
+
+        console.log("Registro exitoso:", result.user);
+        navigate("/inicio-sesion")
+      } else {
+        alert(result.message || "Credenciales inválidas");
+      }
+    } catch (error:any) {
+      console.error(error.message);
+    }
     console.log("Registro:", formData);
   };
 
