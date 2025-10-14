@@ -12,7 +12,7 @@ import { useNavigate } from "react-router";
  * <HomePage />
  */
 const HomePage: React.FC = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   return (
     <div className="home-page">
@@ -30,7 +30,7 @@ const HomePage: React.FC = () => {
             <br />
             dispositivos y sin anuncios
           </p>
-          <button className="cta-button">Comenzar</button>
+          <button className="cta-button" onClick={() => navigate("/inicio-sesion")}>Comenzar</button>
         </div>
       </section>
     </div>
