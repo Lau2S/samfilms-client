@@ -118,16 +118,21 @@ useEffect(() => {
     console.error('Error al eliminar cuenta:', err);
   }
 };
+if (!user) {
+  return <div className="loading">Cargando perfil...</div>;
+}
 
 
     return (
+        
         <div className="profile-page">
             <div className="profile-header">
-                <div className="profile-avatar">
-                    <span className="avatar-icon">👤</span>
-                </div>
-                <h2 className="profile-name">{user.name}</h2>
-            </div>
+            <div className="profile-avatar">
+             <span className="avatar-icon">👤</span>
+             </div>
+             <h2 className="profile-name">{user.name}</h2>
+             </div>
+
 
             <div className="profile-details">
                 <p><strong>Email:</strong> {user.email}</p>
