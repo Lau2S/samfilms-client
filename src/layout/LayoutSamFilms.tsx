@@ -23,13 +23,12 @@ interface LayoutSamFilmsProps {
  * @param {React.ReactNode} props.children - Page content to render.
  * @returns {JSX.Element} The layout wrapper for app pages.
  */
-const LayoutSamFilms: React.FC<LayoutSamFilmsProps> = ({ children }) => {
+const LayoutSamFilms: React.FC = () => {
   return (
     <>
       <Navbar />
       <main>
         <Outlet />
-        {children}
       </main>
       <Footer />
     </>

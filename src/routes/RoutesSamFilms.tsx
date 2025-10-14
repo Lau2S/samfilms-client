@@ -3,30 +3,42 @@ import HomePage from "../pages/home/HomePage";
 import AboutPage from "../pages/about/AboutPage";
 import LoginPage from "../pages/login/LoginPage";
 import RegisterPage from "../pages/register/RegisterPage";
-// import RegistroPage from "../pages/registro/RegistroPage";
+import MoviesPage from "../pages/movies/MoviesPage";
+import ProfilePage from "../pages/profile/ProfilePage";
 import LayoutSamFilms from "../layout/LayoutSamFilms";
+import DashboardLayout from "../layout/DashboardLayout";
+
 /**
- * Top-level route configuration for the CrunchyEISC app.
+ * Top-level route configuration for the SamFilms app.
  *
  * @component
  * @returns {JSX.Element} Router with all application routes inside a shared layout.
  * @remarks
  * - Uses `BrowserRouter` for clean URLs (history API).
- * - Wraps pages with `LayoutCrunchyEISC` to provide global UI (Navbar/Footer).
+ * - Wraps public pages with `LayoutSamFilms` (Navbar + Footer).
+ * - Wraps authenticated pages with `DashboardLayout` (DashboardNavbar only).
  */
 const RoutesSamFilms = () => {
   return (
     <BrowserRouter>
-      <LayoutSamFilms>
-        <Routes>
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<LayoutSamFilms />}>
           <Route path="/" element={<HomePage />} />
-          {/* <Route path="/peliculas" element={<MoviePage />} /> */}
           <Route path="/sobre-nosotros" element={<AboutPage />} />
-          {/* <Route path="/mapa-sitio" element={<SiteMap />} /> */}
           <Route path="/inicio-sesion" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
-        </Routes>
-      </LayoutSamFilms>
+        </Route>
+
+        {/* Authenticated Routes */}
+        <Route element={<DashboardLayout />}>
+          <Route path="/peliculas" element={<MoviesPage />} />
+          {/* <Route path="/peliculas" element={<MoviePage />} /> */}
+          {/* <Route path="/favoritos" element={<FavoritesPage />} /> */}
+          <Route path="/perfil" element={<ProfilePage />} />
+          {/* <Route path="/configuracion" element={<SettingsPage />} /> */}
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 };

@@ -167,18 +167,31 @@ $color-input-text: #333333;
       
       // Enlace de olvido de contraseña
       .forgot-password-container {
-        text-align: right;
+        text-align: center;
         margin-top: 0.3rem;
         margin-bottom: 0rem;
-        
+
+        /* make the button look like a plain link */
         .forgot-password-link {
           font-size: 0.875rem;
-          color: $color-text-muted;
+          color: $color-text-white; /* show as white text */
           text-decoration: none;
-          transition: color 0.3s ease;
-          
+          background: transparent;
+          border: none;
+          padding: 0;
+          margin: 0;
+          cursor: pointer;
+          font: inherit;
+          appearance: none;
+          transition: color 0.2s ease, text-decoration 0.2s ease;
+
           &:hover {
-            color: $color-text-white;
+            color: lighten($color-text-white, 5%);
+            text-decoration: underline;
+          }
+
+          &:focus {
+            outline: none;
             text-decoration: underline;
           }
         }
@@ -230,6 +243,125 @@ $color-input-text: #333333;
       }
     }
   }
+
+  /* Modal styles for forgot-password */
+ .modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 15, 0.95);
+  z-index: 9999;
+}
+
+.forgot-modal {
+ @include glassmorphism;
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  color: $color-text-white;
+  position: relative;
+  animation: fadeInScale 0.4s ease-out;
+
+  h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: $color-text-muted;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    background: $color-input-bg;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    color: $color-input-text;
+    margin-bottom: 1rem;
+
+    &::placeholder {
+      color: rgba(51, 51, 51, 0.6);
+    }
+
+    &:focus {
+      outline: none;
+      border: 2px solid $color-primary;
+      background: rgba(255, 255, 255, 0.95);
+    }
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .submit-button {
+    flex: 1;
+    background: $color-primary;
+    color: $color-text-white;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    // transition: background 0.3s ease;
+
+    // &:hover {
+    //   background: lighten($color-primary, 10%);
+    // }
+  }
+
+  .btn-register {
+    flex: 1;
+    background: transparent;
+    color: $color-text-white;
+    border: 2px solid $color-primary;
+    border-radius: 12px;
+    padding: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    // transition: background 0.3s ease;
+
+    // &:hover {
+    //   background: lighten(#1a1a1f, 5%);
+    // }
+  }
+
+  .forgot-message {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: $color-text-muted;
+    text-align: center;
+  }
+
+  // Botón de cierre (X)
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    font-size: 1.5rem;
+    color: $color-text-muted;
+    cursor: pointer;
+    transition: color 0.3s ease;
+
+    &:hover {
+      color: $color-text-white;
+    }
+  }
+}
+
 }
 
 // Animaciones
