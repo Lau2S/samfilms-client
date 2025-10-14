@@ -40,10 +40,10 @@ const LoginPage: React.FC = () => {
       const result = await response.json();
       console.log("respuesta del servidor",result)
       if (result.success) {
-        localStorage.setItem("token", result.session.access_token);
-        localStorage.setItem("user", JSON.stringify(result.user));
+        localStorage.setItem("token", result.data.token);
+        localStorage.setItem("user", JSON.stringify(result.data.user));
 
-        console.log("Inicio de sesión exitoso:", result.user);
+        console.log("Inicio de sesión exitoso:", result.data.user);
         // Redirect to peliculas list
         navigate('/peliculas');
       } else {
