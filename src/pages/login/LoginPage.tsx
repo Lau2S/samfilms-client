@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     // Aquí irá la lógica de autenticación
-    const url: string = "http://localhost:3000/api/v1/users/login";
+    const url: string = "https://movie-platform-back.onrender.com/api/v1/users/login";
     try {
       const response = await fetch(url, {
         method: "POST", 
