@@ -6,6 +6,7 @@ import RegisterPage from "../pages/register/RegisterPage";
 import MoviesPage from "../pages/movies/MoviesPage";
 import ProfilePage from "../pages/profile/ProfilePage";
 import LayoutSamFilms from "../layout/LayoutSamFilms";
+import SiteMapPage from "../pages/sitemap/SiteMapPage";
 import DashboardLayout from "../layout/DashboardLayout";
 
 /**
@@ -28,6 +29,7 @@ const RoutesSamFilms = () => {
           <Route path="/sobre-nosotros" element={<AboutPage />} />
           <Route path="/inicio-sesion" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
+          <Route path="/mapa-sitio" element={<SiteMapPage />} />
         </Route>
 
         {/* Authenticated Routes */}
