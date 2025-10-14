@@ -14,9 +14,39 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
     // Aquí irá la lógica de autenticación
+    const url: string = "http://localhost:3000/api/v1/users/login";
+    try {
+      const response = await fetch(url, {
+        method: "POST", 
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          correo: email,
+          contrasena: password
+        }) 
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      const result = await response.json();
+      console.log("respuesta del servidor",result)
+      if (result.success) {
+        localStorage.setItem("token", result.session.access_token);
+        localStorage.setItem("user", JSON.stringify(result.user));
+
+        console.log("Inicio de sesión exitoso:", result.user);
+        //navigate("/dashboard"); 
+      } else {
+        alert(result.message || "Credenciales inválidas");
+      }
+    } catch (error:any) {
+      console.error(error.message);
+    }
     console.log("Login:", { email, password });
   };
 
