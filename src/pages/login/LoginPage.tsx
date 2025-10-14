@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import "./LoginPage.scss";
 
 /**
@@ -147,9 +147,9 @@ const LoginPage: React.FC = () => {
           {/* Enlace de registro */}
           <div className="signup-prompt">
             <span>¿Primera vez en Samfilms? </span>
-            <a href="/registro" className="signup-link">
+            <Link to="/registro" className="signup-link">
               Crea tu cuenta aqui
-            </a>
+            </Link>
           </div>
 
           {/* Forgot password modal */}

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import "./RegisterPage.scss";
+import { Link } from "react-router";
 
 
 /**
@@ -229,9 +230,9 @@ const RegisterPage: React.FC = () => {
           {/* Enlace de login */}
           <div className="login-prompt">
             <span>¿Ya tienes una cuenta? </span>
-            <a href="/login" className="login-link">
+            <Link to="/inicio-sesion" className="login-link">
               Inicia Sesion aqui
-            </a>
+            </Link>
           </div>
         </div>
       </div>
