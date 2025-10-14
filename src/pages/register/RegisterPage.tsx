@@ -40,7 +40,7 @@ const RegisterPage: React.FC = () => {
     }
     
     // Aquí irá la lógica de registro
-    const url: string = "http://localhost:3000/api/v1/users/register";
+    const url: string = "https://movie-platform-back.onrender.com/api/v1/users/register";
     try {
       const response = await fetch(url, {
         method: "POST", 
