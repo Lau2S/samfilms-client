@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import HomePage from "../pages/home/HomePage";
 import AboutPage from "../pages/about/AboutPage";
 import LoginPage from "../pages/login/LoginPage";
+import RegisterPage from "../pages/register/RegisterPage";
 // import RegistroPage from "../pages/registro/RegistroPage";
 import LayoutSamFilms from "../layout/LayoutSamFilms";
 /**
@@ -23,7 +24,7 @@ const RoutesSamFilms = () => {
           <Route path="/sobre-nosotros" element={<AboutPage />} />
           {/* <Route path="/mapa-sitio" element={<SiteMap />} /> */}
           <Route path="/inicio-sesion" element={<LoginPage />} />
-          {/* <Route path="/registro" element={<RegistroPage />} /> */}
+          <Route path="/registro" element={<RegisterPage />} />
         </Routes>
       </LayoutSamFilms>
     </BrowserRouter>
