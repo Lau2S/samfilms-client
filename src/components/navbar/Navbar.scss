@@ -9,69 +9,125 @@ nav {
   left: 0;
   right: 0;
   z-index: 1000;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 4rem;
   background: rgba(10, 10, 15, 0.2);
   backdrop-filter: blur(10px);
   
-.nav-logo {
-    height: 40px;
-    width: auto;
-    object-fit: contain;
-    display: block;
-}
+  .nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 4rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+
+    @media (max-width: 1024px) {
+      padding: 1rem 2rem;
+    }
+
+    @media (max-width: 768px) {
+      padding: 1rem 1.5rem;
+      position: relative;
+    }
+  }
+
+  .nav-logo-link {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    z-index: 10;
+
+    .nav-logo {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+      display: block;
+      transition: opacity 0.3s ease;
+
+      &:hover {
+        opacity: 0.8;
+      }
+
+      @media (max-width: 768px) {
+        height: 32px;
+      }
+    }
+  }
   
   // Navigation links container
   .nav-links {
-      display: flex;
-      gap: 2.5rem;
-      align-items: center;
+    display: flex;
+    gap: 2.5rem;
+    align-items: center;
 
-      
-      // Individual links
-      a {
-          color: rgba(255, 255, 255, 0.8);
-          text-decoration: none;
-          font-weight: 400;
-          transition: color 0.3s ease;
-          position: relative;
+    @media (max-width: 1024px) {
+      gap: 2rem;
+    }
 
-          &::after {
-              content: '';
-              position: absolute;
-              bottom: -4px;
-              left: 0;
-              width: 0;
-              height: 2px;
-              background-color: $color-primary;
-              transition: width 0.3s ease;
-          }
+    @media (max-width: 768px) {
+      display: none;
+    }
+    
+    // Individual links
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      transition: color 0.3s ease;
+      position: relative;
+      white-space: nowrap;
 
-          &:hover {
-              color: $color-text-white;
-
-              &::after {
-                  width: 100%;
-              }
-          }
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: $color-primary;
+        transition: width 0.3s ease;
       }
 
+      &:hover {
+        color: $color-text-white;
+
+        &::after {
+          width: 100%;
+        }
+      }
+    }
   }
   
-  // Botones de autenticación
+  // Auth buttons
   .auth-buttons {
     display: flex;
     gap: 1rem;
-    margin-left: 2rem;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      gap: 0.75rem;
+    }
     
     button {
       padding: 0.625rem 1.5rem;
       border-radius: 20px;
       font-weight: 600;
+      font-size: 0.9375rem;
       cursor: pointer;
       transition: all 0.3s ease;
+      white-space: nowrap;
+
+      @media (max-width: 768px) {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        border-radius: 16px;
+      }
+
+      @media (max-width: 480px) {
+        padding: 0.45rem 0.875rem;
+        font-size: 0.8125rem;
+      }
       
       &.btn-register {
         background: transparent;
@@ -82,88 +138,151 @@ nav {
         &:hover {
           background: $color-primary;
           transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+          border-width: 1.5px;
         }
       }
       
       &.btn-login {
-        background: $color-primary;
+        background: linear-gradient(to right, $color-secondary, $color-primary);
         color: $color-text-white;
-        border: 2px solid $color-primary;
-        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
+        border: none;
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
         
         &:hover {
-          //background: lighten($color-primary, 10%);
-          //border-color: lighten($color-primary, 5%);
           transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
+        }
+
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
+  }
+
+  // Mobile Menu Toggle
+  .mobile-menu-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: $color-text-white;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 10;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    @media (max-width: 768px) {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+
+  // Mobile Menu
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: rgba(26, 26, 31, 0.98);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem 0;
+    animation: slideDown 0.3s ease-out;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+
+    &.open {
+      @media (max-width: 768px) {
+        display: block;
+      }
+    }
+
+    .mobile-menu-item {
+      display: block;
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: $color-text-white;
+      text-align: left;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      font-size: 0.9375rem;
+      font-weight: 500;
+
+      &:hover, &:active {
+        background: rgba(139, 92, 246, 0.15);
+        color: $color-primary;
+        padding-left: 2rem;
+      }
+    }
+
+    .mobile-auth-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 0.5rem;
+
+      button {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9375rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &.btn-register {
+          background: transparent;
+          color: $color-text-white;
+          border: 2px solid $color-primary;
+          
+          &:hover, &:active {
+            background: rgba(139, 92, 246, 0.15);
+          }
+        }
+        
+        &.btn-login {
+          background: linear-gradient(to right, $color-secondary, $color-primary);
+          color: $color-text-white;
+          border: none;
+          box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+          
+          &:hover, &:active {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+          }
         }
       }
     }
   }
 }
 
-// Responsive
-@media (max-width: 1024px) {
-  nav {
-    padding: 1.5rem 2rem;
+// Animación
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
-}
-
-@media (max-width: 768px) {
-  nav {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1rem 1.5rem;
-
-    .nav-logo {
-      flex-shrink: 0;
-    }
-    
-    .nav-links {
-      gap: 1.5rem;
-      order: 3;
-      width: 100%;
-      margin-top: 1rem;
-      justify-content: center;
-    }
-    
-    .auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-left: auto;
-
-  button {
-    padding: 0.4rem 0.9rem;
-    font-size: 0.85rem;
-    border-radius: 12px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-
-    &.btn-register {
-      background: transparent;
-      border: 1.5px solid $color-primary;
-      color: $color-primary;
-
-      &:hover {
-        background: $color-primary;
-        color: $color-text-white;
-      }
-    }
-
-    &.btn-login {
-      background: $color-primary;
-      color: $color-text-white;
-      border: none;
-
-      // &:hover {
-      //   background: lighten($color-primary, 10%);
-      // }
-    }
-  }
-}
-
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
