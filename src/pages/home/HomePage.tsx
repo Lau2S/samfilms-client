@@ -1,18 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./HomePage.scss";
 import { useNavigate } from "react-router";
+import { getUsers } from "../../services/api.ts";
 
 /**
  * Home (landing) page of the application.
  *
  * @component
  * @returns {JSX.Element} The landing view with a CTA button to browse movies.
- * @example
- * // Renders a title, subtitle, and a button that navigates to "/peliculas"
- * <HomePage />
  */
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+
+  // ✅ Esto se ejecuta cuando se carga la página
+  useEffect(() => {
+    getUsers()
+      .then((data) => console.log("✅ Conectado al backend. Usuarios:", data))
+      .catch((err) => console.error("❌ Error conectando al backend:", err));
+  }, []);
 
   return (
     <div className="home-page">

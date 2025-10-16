@@ -8,6 +8,7 @@ import ProfilePage from "../pages/profile/ProfilePage";
 import LayoutSamFilms from "../layout/LayoutSamFilms";
 import SiteMapPage from "../pages/sitemap/SiteMapPage";
 import DashboardLayout from "../layout/DashboardLayout";
+import ProtectedRoute from "../components/ProtectedRoute.tsx";
 
 /**
  * Top-level route configuration for the SamFilms app.
@@ -34,11 +35,16 @@ const RoutesSamFilms = () => {
 
         {/* Authenticated Routes */}
         <Route element={<DashboardLayout />}>
-          <Route path="/peliculas" element={<MoviesPage />} />
-          {/* <Route path="/peliculas" element={<MoviePage />} /> */}
-          {/* <Route path="/favoritos" element={<FavoritesPage />} /> */}
-          <Route path="/perfil" element={<ProfilePage />} />
-          {/* <Route path="/configuracion" element={<SettingsPage />} /> */}
+          <Route path="/peliculas" element={
+            <ProtectedRoute>
+              <MoviesPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/perfil" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -8,3 +8,6 @@
      <RoutesSamFilms />
    </React.StrictMode>
  );
+
+console.log('🔧 Environment:', import.meta.env.MODE);
+console.log('🌐 API URL:', import.meta.env.VITE_API_URL);

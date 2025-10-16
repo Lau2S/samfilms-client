@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import "./RegisterPage.scss";
 import { Link } from "react-router";
-
+import api from "../../services/api.ts";
 
 /**
  * Register page with user registration form.
@@ -31,49 +31,30 @@ const RegisterPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validación básica de contraseñas
     if (formData.password !== formData.confirmPassword) {
       alert("Las contraseñas no coinciden");
       return;
     }
-    
-    // Aquí irá la lógica de registro
-    const url: string = "https://movie-platform-back.onrender.com/api/v1/users/register";
+
     try {
-      const response = await fetch(url, {
-        method: "POST", 
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          nombres: formData.nombre,
-          apellidos: formData.apellido,
-          edad: formData.edad,
-          correo: formData.email,
-          contrasena: formData.password,
-        }) 
+      const result = await api.register({
+        nombres: formData.nombre,
+        apellidos: formData.apellido,
+        edad: parseInt(formData.edad),
+        correo: formData.email,
+        contrasena: formData.password,
       });
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-      const result = await response.json();
-      console.log("respuesta del servidor",result)
       if (result.success) {
-        alert("registro exitoso")
-
-        console.log("Registro exitoso:", result.user);
-        navigate("/inicio-sesion")
-      } else {
-        alert(result.message || "Credenciales inválidas");
+        alert("Registro exitoso");
+        navigate("/inicio-sesion");
       }
-    } catch (error:any) {
-      console.error(error.message);
+    } catch (error: any) {
+      alert(error.message || "Error al registrar");
     }
-    console.log("Registro:", formData);
   };
 
   const handleBack = () => {
@@ -172,8 +153,8 @@ const RegisterPage: React.FC = () => {
               <button
                 type="button"
                 className="toggle-password"
-                // onClick={() => setShowPassword(!showPassword)}
-                // aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {/* {showPassword ? (
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -204,8 +185,8 @@ const RegisterPage: React.FC = () => {
               <button
                 type="button"
                 className="toggle-password"
-                // onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                // aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                onClick={() => setShowConfirmPassword((s) => !s)}
+                aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
                 {/* {showConfirmPassword ? (
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
