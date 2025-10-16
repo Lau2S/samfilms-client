@@ -1,65 +1,47 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { useNavigate, Link } from "react-router";
+import api from "../../services/api";
 import "./LoginPage.scss";
 
-/**
- * Login page with authentication form.
- *
- * @component
- * @returns {JSX.Element} Login form with email and password inputs.
- */
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [forgotOpen, setForgotOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotMessage, setForgotMessage] = useState<string | null>(null);
 
-  const handleSubmit = async(e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí irá la lógica de autenticación
-    const url: string = "https://movie-platform-back.onrender.com/api/v1/users/login";
-    try {
-      const response = await fetch(url, {
-        method: "POST", 
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          correo: email,
-          contrasena: password
-        }) 
-      });
+    setLoading(true);
+    setError(null);
 
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
-      }
-      const result = await response.json();
-      console.log("respuesta del servidor",result)
-      if (result.success) {
+    try {
+      const result: any = await api.login({ correo: email, contrasena: password });
+      if (result && result.success && result.data) {
         localStorage.setItem("token", result.data.token);
         localStorage.setItem("user", JSON.stringify(result.data.user));
-
-        console.log("Inicio de sesión exitoso:", result.data.user);
-        // Redirect to peliculas list
-        navigate('/peliculas');
-      } else {
-        alert(result.message || "Credenciales inválidas");
+        navigate("/peliculas");
+        return;
       }
-    } catch (error:any) {
-      console.error(error.message);
+      setError(result?.message || "Credenciales inválidas");
+    } catch (err: any) {
+      setError(err?.message || "Error al iniciar sesión");
+    } finally {
+      setLoading(false);
     }
-    console.log("Login:", { email, password });
   };
 
   const handleBack = () => {
     navigate("/");
   };
 
-  return (
+ return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-card">
@@ -128,9 +110,11 @@ const LoginPage: React.FC = () => {
             </div>
 
             {/* Botón de Submit */}
-            <button type="submit" className="submit-button">
-              Iniciar Sesion
+            <button type="submit" className="submit-button" disabled={loading}>
+              {loading ? 'Iniciando...' : 'Iniciar Sesion'}
             </button>
+
+            {error && <p className="form-error" role="alert">{error}</p>}
 
             {/* Enlace de olvido de contraseña */}
             <div className="forgot-password-container">
