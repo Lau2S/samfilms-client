@@ -6,10 +6,6 @@ $color-text-muted: rgba(255, 255, 255, 0.7);
 $color-input-bg: rgba(255, 255, 255, 0.9);
 $color-input-text: #333333;
 $color-bg-dark: #0a0a0f;
-$color-text-white: #ffffff;
-$color-text-muted: rgba(51, 51, 51, 0.6);
-$color-input-bg: rgba(255, 255, 255, 0.9);
-$color-input-text: #333333;
 
 @mixin glassmorphism {
   background: $color-card-bg;
@@ -18,150 +14,237 @@ $color-input-text: #333333;
 }
 
 .profile-page {
-    max-width: 400px;
-    margin: 9rem auto;
-    padding: 2rem;
-    background-color: #f9f9f9;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    font-family: 'Segoe UI', sans-serif;
-    @include glassmorphism;
-    border-radius: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  margin: 8rem auto 2rem;
+  padding: 2.5rem;
+  @include glassmorphism;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  @media (max-width: 768px) {
+    margin: 6rem auto 2rem;
+    padding: 2rem 1.5rem;
+    max-width: calc(100% - 2rem);
+  }
+
+  @media (max-width: 480px) {
+    margin: 5rem auto 1.5rem;
+    padding: 1.5rem 1rem;
+    max-width: calc(100% - 1.5rem);
+  }
 }
 
 .profile-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  @media (max-width: 480px) {
     margin-bottom: 1.5rem;
+  }
 }
 
 .profile-avatar {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(135deg, $color-secondary, $color-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 480px) {
     width: 80px;
     height: 80px;
-    background-color: #ddd;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 2rem;
-    margin-bottom: 0.5rem;
+  }
 }
 
 .profile-name {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: $color-text-white;
+  margin-bottom: 0.25rem;
+
+  @media (max-width: 480px) {
     font-size: 1.5rem;
-    font-weight: 600;
-    color: $color-text-white;
+  }
 }
 
 .profile-details {
+  margin-bottom: 2rem;
+  line-height: 1.8;
+  color: $color-text-white;
+
+  p {
+    margin-bottom: 0.75rem;
+    font-size: 0.9375rem;
+
+    strong {
+      color: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
+      margin-right: 0.5rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (max-width: 480px) {
     margin-bottom: 1.5rem;
-    line-height: 1.6;
-    color: $color-text-white;
+  }
 }
 
 .profile-actions {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 }
 
 .edit-button,
 .delete-button {
-    flex: 1;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+  flex: 1;
+  padding: 0.875rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  @media (max-width: 480px) {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
 }
 
 .edit-button {
-      background: linear-gradient(
-            to right,
-            $color-secondary,
-            $color-primary
-            );
-     color: $color-text-white;
+  background: linear-gradient(to right, $color-secondary, $color-primary);
+  color: $color-text-white;
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 
-     &:hover {
-         transform: translateY(-2px);
-         box-shadow: 0 6px 30px rgba(139, 92, 246, 0.2);
-     }
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
+  }
 
-     &:active {
-         transform: translateY(0);
-     }
-}
-
-.edit-button:hover {
-    background-color: #43a047;
+  &:active {
+    transform: translateY(0);
+  }
 }
 
 .delete-button {
-    background-color: #f44336;
-    color: white;
-}
+  background-color: #f44336;
+  color: white;
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
 
-.delete-button:hover {
+  &:hover {
     background-color: #e53935;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(244, 67, 54, 0.4);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
 }
 
-/* Fondo borroso y centrado */
+/* Modal overlay mejorado */
 .modal-overlay {
   position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 10, 15, 0.1); // fondo claro
-  backdrop-filter: blur(3px); // desenfoque real
-  z-index: 1200;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease-out;
+  overflow-y: auto;
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+    align-items: flex-start;
+    padding-top: 3rem;
+  }
 }
 
-/* Tarjeta modal con glassmorphism */
+/* Tarjeta modal mejorada */
 .modal-card {
   @include glassmorphism;
   width: 100%;
   max-width: 480px;
-  margin-top: 4rem;
-  padding: 2rem;
-  background-color: #0a0a0f;
+  padding: 2.5rem;
+  background: rgba(26, 26, 31, 0.95);
   border-radius: 20px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   color: $color-text-white;
   position: relative;
-  animation: fadeInScale 0.4s ease-out;
+  animation: scaleIn 0.3s ease-out;
+
+  @media (max-width: 768px) {
+    max-width: 90%;
+    padding: 2rem 1.5rem;
+  }
+
+  @media (max-width: 480px) {
+    max-width: 100%;
+    padding: 1.75rem 1.25rem;
+    margin: 0 auto;
+  }
 
   h3 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
     text-align: center;
+    font-weight: 600;
+
+    @media (max-width: 480px) {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
   }
 
   p {
-    font-size: 0.95rem;
-    color: $color-text-white;
+    font-size: 0.9375rem;
+    color: $color-text-muted;
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
 
     &.modal-sub {
       font-style: italic;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 480px) {
+      font-size: 0.875rem;
+      margin-bottom: 1.25rem;
     }
   }
 
   .form-input {
     width: 100%;
-    padding: 0.85rem 1rem;
+    padding: 0.875rem 1rem;
     border-radius: 12px;
-    border: none;
-    margin-bottom: 0.75rem;
+    border: 2px solid transparent;
+    margin-bottom: 1rem;
     background: $color-input-bg;
     color: $color-input-text;
-    font-size: 1rem;
+    font-size: 0.9375rem;
+    transition: all 0.3s ease;
 
     &::placeholder {
       color: rgba(51, 51, 51, 0.6);
@@ -169,70 +252,151 @@ $color-input-text: #333333;
 
     &:focus {
       outline: none;
-      border: 2px solid $color-primary;
+      border-color: $color-primary;
       background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.75rem 0.875rem;
+      font-size: 0.875rem;
+      margin-bottom: 0.875rem;
     }
   }
 
   .modal-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 1rem;
     justify-content: center;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
   }
 
   .save-button,
   .confirm-delete {
     flex: 1;
-    padding: 0.9rem 1.5rem;
+    padding: 0.875rem 1.5rem;
     border-radius: 12px;
     border: none;
-    background: $color-primary;
+    background: linear-gradient(to right, $color-secondary, $color-primary);
     color: $color-text-white;
     font-weight: 600;
+    font-size: 0.9375rem;
     cursor: pointer;
-    // transition: background 0.3s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
 
-    // &:hover {
-    //   background: lighten($color-primary, 10%);
-    // }
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(139, 92, 246, 0.4);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  .confirm-delete {
+    background: linear-gradient(135deg, #f44336, #e53935);
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+
+    &:hover {
+      box-shadow: 0 6px 25px rgba(244, 67, 54, 0.4);
+    }
   }
 
   .cancel-delete {
     flex: 1;
-    padding: 0.9rem 1.3rem;
+    padding: 0.875rem 1.5rem;
     border-radius: 12px;
     border: 2px solid $color-primary;
-    background: transparent;;
+    background: transparent;
     color: $color-text-white;
     font-weight: 500;
+    font-size: 0.9375rem;
     cursor: pointer;
+    transition: all 0.3s ease;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(139, 92, 246, 0.1);
+      border-color: lighten($color-primary, 10%);
+    }
+
+    &:active {
+      background: rgba(139, 92, 246, 0.2);
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
     }
   }
 
   .modal-close {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 1.25rem;
+    right: 1.25rem;
     background: transparent;
     border: none;
-    font-size: 1.5rem;
-    color: $color-text-white;
+    font-size: 1.75rem;
+    color: $color-text-muted;
     cursor: pointer;
+    transition: all 0.3s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    line-height: 1;
 
     &:hover {
       color: $color-text-white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    @media (max-width: 480px) {
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      width: 28px;
+      height: 28px;
     }
   }
 }
 
+/* Animaciones mejoradas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
-/* Smaller screens */
-@media (max-width: 480px) {
-    .modal-card { padding: 1rem; margin: 0 1rem; }
-    .save-button, .confirm-delete, .cancel-delete { width: 100%; }
-    .modal-actions { flex-direction: column; gap: 0.5rem; }
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Estilos para prevenir scroll del body cuando modal está abierto */
+body.modal-open {
+  overflow: hidden;
 }

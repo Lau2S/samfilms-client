@@ -1,0 +1,21 @@
+// Layout principal para páginas públicas
+.main-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  main {
+    flex: 1;
+    padding-top: 72px; // Altura del navbar fijo
+
+    @media (max-width: 768px) {
+      padding-top: 64px; // Altura del navbar móvil
+    }
+  }
+}
+
+// Prevenir scroll horizontal
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}

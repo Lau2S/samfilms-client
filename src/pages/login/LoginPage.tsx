@@ -138,12 +138,12 @@ const LoginPage: React.FC = () => {
 
           {/* Forgot password modal */}
           {forgotOpen && (
-            <div className="modal-overlay" role="dialog" aria-modal="true">
+            <div className="modal-overlay">
               <div className="forgot-modal">
                 <button className="modal-close" onClick={() => setForgotOpen(false)} aria-label="Cerrar modal">×</button>
 
                 <h3>Recuperar contraseña</h3>
-                <p>Ingresa tu correo y te enviaremos un enlace para restablecer la contraseña.</p>
+                <p className="modal-sub">Ingresa tu correo y te enviaremos un enlace para restablecer la contraseña.</p>
                 <input
                   type="email"
                   placeholder="Tu correo"

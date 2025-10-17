@@ -22,11 +22,7 @@ $color-input-text: #333333;
   padding: 2rem;
   
   // Fondo con imagen borrosa
-  background-image: url('/public/fondo.png');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: relative;
+  background-color: $color-bg-dark;
   
   // Overlay oscuro
   &::before {
