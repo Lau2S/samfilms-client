@@ -1,11 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
-// Log para debugging (se puede remover en producción)
-if (import.meta.env.MODE === 'development') {
-  console.log('🔧 Environment:', import.meta.env.MODE);
-  console.log('🌐 API URL:', API_BASE_URL);
-}
-
 interface ApiResponse<T = any> {
   success: boolean;
   message?: string;
@@ -19,31 +13,32 @@ class ApiService {
 
   constructor() {
     this.baseURL = API_BASE_URL;
-    
-    // Advertencia si no hay URL configurada en producción
-    if (!import.meta.env.VITE_API_URL && import.meta.env.MODE === 'production') {
-      console.error('❌ VITE_API_URL no configurada en producción');
-    }
   }
 
+  // Método privado para obtener headers con token
   private getHeaders(includeAuth: boolean = false): HeadersInit {
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
     if (includeAuth) {
       const token = localStorage.getItem('token');
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
     }
+
     return headers;
   }
 
+  // Método genérico para hacer peticiones
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
     requiresAuth: boolean = false
   ): Promise<ApiResponse<T>> {
     try {
-      const url = `${this.baseURL}${endpoint}`;
-      
-      const response = await fetch(url, {
+      const response = await fetch(`${this.baseURL}${endpoint}`, {
         ...options,
         headers: {
           ...this.getHeaders(requiresAuth),
@@ -58,19 +53,8 @@ class ApiService {
       }
 
       return data;
-    } catch (error: any) {
-      console.error('❌ API Error:', error);
-      
-      // Manejo de errores de red
-      if (error.message === 'Failed to fetch') {
-        throw new Error('No se pudo conectar con el servidor. Verifica tu conexión.');
-      }
-      
-      // Manejo de errores CORS
-      if (error.message.includes('CORS')) {
-        throw new Error('Error de CORS. Verifica la configuración del servidor.');
-      }
-      
+    } catch (error) {
+      console.error('API Error:', error);
       throw error;
     }
   }
@@ -100,7 +84,7 @@ class ApiService {
   async logout() {
     return this.request('/users/logout', {
       method: 'POST',
-    }, true);
+    }, true); // Requiere autenticación
   }
 
   async forgotPassword(email: string) {
@@ -231,41 +215,6 @@ class ApiService {
       body: JSON.stringify({ usuario_id }),
     }, true);
   }
-
-  // ========== USUARIOS ==========
-
-  async getUsers() {
-    return this.request('/users', { method: 'GET' });
-  }
-
-  // ========== UTILIDADES ==========
-
-  /**
-   * Verifica si la API está disponible
-   */
-  async healthCheck(): Promise<boolean> {
-    try {
-      const response = await fetch(`${this.baseURL.replace('/api/v1', '')}/health`);
-      return response.ok;
-    } catch {
-      return false;
-    }
-  }
-
-  /**
-   * Obtiene la URL base de la API
-   */
-  getBaseURL(): string {
-    return this.baseURL;
-  }
 }
 
-const api = new ApiService();
-
-// Convenience named export usado por algunos componentes (e.g. HomePage)
-export const getUsers = async () => {
-  const res = await api.getUsers();
-  return res?.data ?? res;
-};
-
-export default api;
+export default new ApiService();
