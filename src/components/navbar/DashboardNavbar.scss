@@ -11,10 +11,6 @@ $color-text-muted: rgba(255, 255, 255, 0.6);
   left: 0;
   right: 0;
   z-index: 1000;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 4rem;
   background: rgba(10, 10, 15, 0.2);
   backdrop-filter: blur(10px);
 
@@ -22,19 +18,20 @@ $color-text-muted: rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 2rem;
+    padding: 1rem 2rem;
     gap: 2rem;
     max-width: 1600px;
     margin: 0 auto;
 
     @media (max-width: 1024px) {
-      padding: 0 1.5rem;
+      padding: 1rem 1.5rem;
       gap: 1.5rem;
     }
 
     @media (max-width: 768px) {
-      padding: 0 1rem;
+      padding: 0.75rem 1.25rem;
       gap: 1rem;
+      flex-wrap: wrap;
     }
   }
 
@@ -52,6 +49,62 @@ $color-text-muted: rgba(255, 255, 255, 0.6);
 
       &:hover {
         opacity: 0.8;
+      }
+
+      @media (max-width: 768px) {
+        height: 32px;
+      }
+    }
+  }
+
+  // Navigation links
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+
+    @media (max-width: 1024px) {
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      order: 4;
+      width: 100%;
+      justify-content: center;
+      gap: 1.5rem;
+      padding-top: 0.75rem;
+    }
+
+    a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      transition: color 0.3s ease;
+      position: relative;
+      white-space: nowrap;
+
+      @media (max-width: 768px) {
+        font-size: 0.875rem;
+      }
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background-color: $color-primary;
+        transition: width 0.3s ease;
+      }
+
+      &:hover {
+        color: $color-text-white;
+
+        &::after {
+          width: 100%;
+        }
       }
     }
   }
@@ -98,7 +151,10 @@ $color-text-muted: rgba(255, 255, 255, 0.6);
     }
 
     @media (max-width: 768px) {
-      display: none;
+      order: 2;
+      flex: 1;
+      max-width: none;
+      margin: 0 0.5rem;
     }
   }
 
@@ -107,6 +163,11 @@ $color-text-muted: rgba(255, 255, 255, 0.6);
     display: flex;
     align-items: center;
     gap: 1.5rem;
+
+    @media (max-width: 768px) {
+      order: 3;
+      gap: 0;
+    }
 
     .icon-button {
       background: transparent;
@@ -129,10 +190,10 @@ $color-text-muted: rgba(255, 255, 255, 0.6);
         width: 24px;
         height: 24px;
       }
-    }
 
-    @media (max-width: 768px) {
-      display: none;
+      @media (max-width: 768px) {
+        display: none;
+      }
     }
   }
 
@@ -141,11 +202,11 @@ $color-text-muted: rgba(255, 255, 255, 0.6);
     position: relative;
 
     .user-menu-trigger {
-       background: linear-gradient(
-            to right,
-            $color-secondary,
-            $color-primary
-            );
+      background: linear-gradient(
+        to right,
+        $color-secondary,
+        $color-primary
+      );
       border: 1px solid rgba(139, 92, 246, 0.3);
       color: $color-text-white;
       cursor: pointer;
@@ -217,71 +278,14 @@ $color-text-muted: rgba(255, 255, 255, 0.6);
     }
   }
 
-  // Mobile Menu Toggle
+  // Mobile Menu Toggle - Hidden now
   .mobile-menu-toggle {
     display: none;
-    background: transparent;
-    border: none;
-    color: $color-text-white;
-    cursor: pointer;
-    padding: 0.5rem;
-
-    svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    @media (max-width: 768px) {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
   }
 
-  // Mobile Menu
+  // Mobile Menu - Hidden now
   .mobile-menu {
     display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(10, 10, 15, 0.98);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 1rem 0;
-    animation: slideDown 0.3s ease-out;
-
-    .mobile-menu-item {
-      display: block;
-      width: 100%;
-      padding: 0.75rem 1.5rem;
-      background: transparent;
-      border: none;
-      color: $color-text-white;
-      text-align: left;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      font-size: 0.9375rem;
-
-      &:hover {
-        background: rgba(139, 92, 246, 0.2);
-        color: $color-primary;
-        padding-left: 2rem;
-      }
-
-      &.logout-btn {
-        color: #ff6b6b;
-
-        &:hover {
-          background: rgba(255, 107, 107, 0.1);
-          color: #ff5252;
-        }
-      }
-    }
-
-    @media (max-width: 768px) {
-      display: block;
-    }
   }
 }
 
