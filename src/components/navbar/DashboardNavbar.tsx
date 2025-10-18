@@ -11,7 +11,6 @@ import "./DashboardNavbar.scss";
  */
 const DashboardNavbar: React.FC = () => {
   const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -28,11 +27,14 @@ const DashboardNavbar: React.FC = () => {
           <img src="/logo.png" alt="SamFilms Logo" className="brand-logo" />
         </Link>
 
+        {/* Navigation Links - Always visible */}
         <div className="nav-links">
-                <Link to="/peliculas">Inicio</Link>
-                <Link to="/catalogo">Peliculas</Link>
-                <Link to="/favoritos">Favoritos</Link>
-              </div>
+          <Link to="/peliculas">Inicio</Link>
+          <Link to="/catalogo">Peliculas</Link>
+          <Link to="/favoritos">Favoritos</Link>
+        </div>
+        
+      
 
         {/* Search Bar */}
         <div className="search-container">
@@ -49,7 +51,6 @@ const DashboardNavbar: React.FC = () => {
 
         {/* Right Section - Desktop */}
         <div className="navbar-right">
-
           {/* User Menu */}
           <div className="user-menu-wrapper">
             <button
@@ -76,44 +77,10 @@ const DashboardNavbar: React.FC = () => {
             )}
           </div>
         </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          className="mobile-menu-toggle"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMobileMenuOpen ? (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          ) : (
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          )}
-        </button>
       </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="mobile-menu">
-          <Link to="/favoritos" className="mobile-menu-item">
-            Mis Favoritos
-          </Link>
-          <Link to="/perfil" className="mobile-menu-item">
-            Mi Perfil
-          </Link>
-          <button onClick={handleLogout} className="mobile-menu-item logout-btn">
-            Cerrar Sesión
-          </button>
-        </div>
-      )}
     </nav>
   );
+  
 };
 
 export default DashboardNavbar;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
 import api from "../../services/api";
 import "./LoginPage.scss";
@@ -41,7 +41,69 @@ const LoginPage: React.FC = () => {
     navigate("/");
   };
 
- return (
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (forgotOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, [forgotOpen]);
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setForgotOpen(false);
+      }
+    };
+
+    if (forgotOpen) {
+      document.addEventListener('keydown', handleEscape);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [forgotOpen]);
+
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      setForgotOpen(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!forgotEmail) {
+      setForgotMessage('Ingresa un correo válido.');
+      return;
+    }
+    setForgotLoading(true);
+    setForgotMessage(null);
+    try {
+      const res = await fetch('http://localhost:3000/api/v1/users/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo: forgotEmail }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setForgotMessage(data.message || 'Correo enviado. Revisa tu bandeja.');
+      } else {
+        setForgotMessage(data.message || 'Ocurrió un error al enviar el correo.');
+      }
+    } catch (err: any) {
+      setForgotMessage(err.message || 'Error de red');
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  return (
     <div className="login-page">
       <div className="login-container">
         <div className="login-card">
@@ -77,7 +139,6 @@ const LoginPage: React.FC = () => {
               />
             </div>
 
-
             {/* Campo de Contraseña */}
             <div className="form-group password-group">
               <input
@@ -95,17 +156,7 @@ const LoginPage: React.FC = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
-                {/* {showPassword ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )} */}
+                {/* Iconos comentados */}
               </button>
             </div>
 
@@ -121,7 +172,11 @@ const LoginPage: React.FC = () => {
               <button
                 type="button"
                 className="forgot-password-link"
-                onClick={() => { setForgotOpen(true); setForgotMessage(null); }}
+                onClick={() => { 
+                  setForgotOpen(true); 
+                  setForgotMessage(null);
+                  setForgotEmail('');
+                }}
               >
                 ¿Olvidaste tu contraseña?
               </button>
@@ -135,61 +190,49 @@ const LoginPage: React.FC = () => {
               Crea tu cuenta aqui
             </Link>
           </div>
-
-          {/* Forgot password modal */}
-          {forgotOpen && (
-            <div className="modal-overlay">
-              <div className="forgot-modal">
-                <button className="modal-close" onClick={() => setForgotOpen(false)} aria-label="Cerrar modal">×</button>
-
-                <h3>Recuperar contraseña</h3>
-                <p className="modal-sub">Ingresa tu correo y te enviaremos un enlace para restablecer la contraseña.</p>
-                <input
-                  type="email"
-                  placeholder="Tu correo"
-                  value={forgotEmail}
-                  onChange={(e) => setForgotEmail(e.target.value)}
-                  className="form-input"
-                />
-                <div className="modal-actions">
-                  <button
-                    className="submit-button"
-                    onClick={async () => {
-                      if (!forgotEmail) {
-                        setForgotMessage('Ingresa un correo válido.');
-                        return;
-                      }
-                      setForgotLoading(true);
-                      setForgotMessage(null);
-                      try {
-                        const res = await fetch('http://localhost:3000/api/v1/users/forgot-password', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ correo: forgotEmail }),
-                        });
-                        const data = await res.json();
-                        if (res.ok) {
-                          setForgotMessage(data.message || 'Correo enviado. Revisa tu bandeja.');
-                        } else {
-                          setForgotMessage(data.message || 'Ocurrió un error al enviar el correo.');
-                        }
-                      } catch (err:any) {
-                        setForgotMessage(err.message || 'Error de red');
-                      } finally {
-                        setForgotLoading(false);
-                      }
-                    }}
-                  >
-                    {forgotLoading ? 'Enviando...' : 'Enviar correo'}
-                  </button>
-                  <button className="btn-register" onClick={() => setForgotOpen(false)}>Cancelar</button>
-                </div>
-                {forgotMessage && <p className="forgot-message">{forgotMessage}</p>}
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Forgot password modal */}
+      {forgotOpen && (
+        <div className="modal-overlay" onClick={handleOverlayClick}>
+          <div className="forgot-modal">
+            <button 
+              className="modal-close" 
+              onClick={() => setForgotOpen(false)} 
+              aria-label="Cerrar modal"
+            >
+              ×
+            </button>
+
+            <h3>Recuperar contraseña</h3>
+            <p className="modal-sub">Ingresa tu correo y te enviaremos un enlace para restablecer la contraseña.</p>
+            <input
+              type="email"
+              placeholder="Tu correo"
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+              className="form-input"
+            />
+            <div className="modal-actions">
+              <button
+                className="submit-button"
+                onClick={handleForgotPassword}
+                disabled={forgotLoading}
+              >
+                {forgotLoading ? 'Enviando...' : 'Enviar correo'}
+              </button>
+              <button 
+                className="btn-register" 
+                onClick={() => setForgotOpen(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+            {forgotMessage && <p className="forgot-message">{forgotMessage}</p>}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
