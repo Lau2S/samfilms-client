@@ -13,25 +13,18 @@ class ApiService {
 
   constructor() {
     this.baseURL = API_BASE_URL;
+    if (!this.baseURL) console.warn('VITE_API_URL no configurada, usando localhost');
   }
 
-  // Método privado para obtener headers con token
   private getHeaders(includeAuth: boolean = false): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
     if (includeAuth) {
       const token = localStorage.getItem('token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
+      if (token) headers['Authorization'] = `Bearer ${token}`;
     }
-
     return headers;
   }
 
-  // Método genérico para hacer peticiones
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -53,12 +46,17 @@ class ApiService {
       }
 
       return data;
-    } catch (error) {
-      console.error('API Error:', error);
+    } catch (error: any) {
+      console.error('❌ API Error:', error);
+      
+      // Manejo de errores de red
+      if (error.message === 'Failed to fetch') {
+        throw new Error('No se pudo conectar con el servidor. Verifica tu conexión.');
+      }
+      
       throw error;
     }
   }
-
   // ========== AUTENTICACIÓN ==========
   
   async register(userData: {
@@ -215,6 +213,20 @@ class ApiService {
       body: JSON.stringify({ usuario_id }),
     }, true);
   }
+
+  // ========== USUARIOS (ADMIN / listado público si aplica) ==========
+
+  async getUsers() {
+    return this.request('/users', { method: 'GET' });
+  }
 }
 
-export default new ApiService();
+const api = new ApiService();
+
+// Convenience named export used by some components (e.g. HomePage)
+export const getUsers = async () => {
+  const res = await api.getUsers();
+  return res?.data ?? res;
+};
+
+export default api;
