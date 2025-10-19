@@ -9,6 +9,7 @@ import LayoutSamFilms from "../layout/LayoutSamFilms";
 import SiteMapPage from "../pages/sitemap/SiteMapPage";
 import DashboardLayout from "../layout/DashboardLayout";
 import ProtectedRoute from "../components/ProtectedRoute.tsx";
+import ResetPasswordPage from '../pages/reset-password/ResetPasswordPage';
 
 /**
  * Top-level route configuration for the SamFilms app.
@@ -31,6 +32,7 @@ const RoutesSamFilms = () => {
           <Route path="/inicio-sesion" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/mapa-sitio" element={<SiteMapPage />} />
+          <Route path="/restablecer-contrasena" element={<ResetPasswordPage />} />
         </Route>
 
         {/* Authenticated Routes */}
