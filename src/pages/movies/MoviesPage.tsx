@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import './MoviesPage.scss';
 
 interface Movie {
@@ -17,6 +18,7 @@ interface HeroMovie {
 
 const MoviesPage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const navigate = useNavigate();
 
   // Hero movies for carousel
   const heroMovies: HeroMovie[] = [
@@ -89,6 +91,10 @@ const MoviesPage: React.FC = () => {
     setCurrentSlide(index);
   };
 
+  const handleMovieClick = (movieId: number) => {
+    navigate(`/peliculas/${movieId}`);
+  };
+
   return (
     <div className="movies-page">
       {/* Hero Carousel */}
@@ -147,7 +153,12 @@ const MoviesPage: React.FC = () => {
           </div>
           <div className="movies-grid">
             {dramaMovies.map((movie) => (
-              <div key={movie.id} className="movie-card">
+              <div 
+              key={movie.id} 
+              className="movie-card"
+              onClick={() => handleMovieClick(movie.id)}
+              style={{ cursor: 'pointer' }}
+              >
                 <img 
                   src={movie.poster} 
                   alt={movie.title} 
@@ -170,7 +181,12 @@ const MoviesPage: React.FC = () => {
           </div>
           <div className="movies-grid">
             {actionMovies.map((movie) => (
-              <div key={movie.id} className="movie-card">
+              <div 
+              key={movie.id} 
+              className="movie-card"
+              onClick={() => handleMovieClick(movie.id)}
+              style={{ cursor: 'pointer' }}
+              >
                 <img 
                   src={movie.poster} 
                   alt={movie.title} 
@@ -193,7 +209,12 @@ const MoviesPage: React.FC = () => {
           </div>
           <div className="movies-grid">
             {thrillerMovies.map((movie) => (
-              <div key={movie.id} className="movie-card">
+              <div 
+              key={movie.id} 
+              className="movie-card"
+              onClick={() => handleMovieClick(movie.id)}
+              style={{ cursor: 'pointer' }}
+              >
                 <img 
                   src={movie.poster} 
                   alt={movie.title} 

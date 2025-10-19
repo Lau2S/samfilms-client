@@ -1,0 +1,68 @@
+// WatchMoviePage.scss
+.watch-movie-page {
+  background: #181818;
+  color: #fff;
+  padding: 30px 0;
+  min-height: 80vh;
+}
+
+.movie-header {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  padding-left: 60px;
+}
+
+.movie-poster {
+  width: 140px;
+  height: 210px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.movie-info {
+  max-width: 500px;
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
+  }
+  .rating {
+    color: gold;
+    font-size: 1.7em;
+    margin-bottom: 0.5em;
+  }
+  p {
+    margin: 0.2em 0;
+  }
+  a {
+    color: #a5d6ff;
+    text-decoration: underline;
+  }
+}
+
+.movie-player {
+  position: relative;
+  width: 680px;
+  max-width: 95vw;
+  margin: 0 auto;
+  .movie-frame {
+    width: 100%;
+    height: 360px;
+    object-fit: cover;
+    border-radius: 7px;
+    display: block;
+  }
+  .play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4em;
+    color: #fafafa;
+    background: rgba(0,0,0,0.3);
+    border-radius: 50%;
+    padding: 18px 22px;
+    cursor: pointer;
+  }
+}
