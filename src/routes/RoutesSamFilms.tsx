@@ -4,6 +4,7 @@ import AboutPage from "../pages/about/AboutPage";
 import LoginPage from "../pages/login/LoginPage";
 import RegisterPage from "../pages/register/RegisterPage";
 import MoviesPage from "../pages/movies/MoviesPage";
+import WatchMoviePage from "../pages/watch_movie/WatchMoviePage.tsx";
 import ProfilePage from "../pages/profile/ProfilePage";
 import LayoutSamFilms from "../layout/LayoutSamFilms";
 import SiteMapPage from "../pages/sitemap/SiteMapPage";
@@ -40,6 +41,16 @@ const RoutesSamFilms = () => {
               <MoviesPage />
             </ProtectedRoute>
           } />
+
+        <Route 
+          path="/peliculas/:movieId" 
+          element={
+            <ProtectedRoute>
+              <WatchMoviePage />              
+            </ProtectedRoute>
+          }
+          />
+
           <Route path="/perfil" element={
             <ProtectedRoute>
               <ProfilePage />
