@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router";
+import api from "../../services/api";
 import "./ResetPasswordPage.scss";
 
 const ResetPasswordPage: React.FC = () => {
@@ -9,8 +10,8 @@ const ResetPasswordPage: React.FC = () => {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword] = useState(false);
+  const [showConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -65,27 +66,31 @@ const ResetPasswordPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/v1/users/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          token, 
-          nuevaContrasena: password 
-        }),
-      });
+      console.log('🔐 Restableciendo contraseña con token...');
+      
+      // ✅ Usar el API service centralizado
+      const response = await api.resetPassword(token, password);
 
-      const data = await response.json();
+      console.log('✅ Respuesta del servidor:', response);
 
-      if (response.ok) {
+      if (response.success) {
         setSuccess(true);
         setTimeout(() => {
           navigate('/inicio-sesion');
         }, 3000);
       } else {
-        setError(data.message || "Error al restablecer la contraseña");
+        setError(
+          response.message || 
+          response.message_es || 
+          "Error al restablecer la contraseña"
+        );
       }
-    } catch (err: any) {
-      setError(err.message || "Error de conexión");
+    } catch (error: any) {
+      console.error('❌ Error restableciendo contraseña:', error);
+      setError(
+        error.message || 
+        "Error al conectar con el servidor"
+      );
     } finally {
       setLoading(false);
     }
@@ -127,7 +132,6 @@ const ResetPasswordPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="reset-form">
             {/* Nueva Contraseña */}
             <div className="form-group">
-
               <div className="password-group">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -138,24 +142,6 @@ const ResetPasswordPage: React.FC = () => {
                   required
                   className={`form-input ${error && password !== confirmPassword ? 'error' : ''}`}
                 />
-                {/* <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                >
-                  {/* {showPassword ? (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )} 
-                </button> */}
               </div>
               
               {password && (
@@ -197,24 +183,6 @@ const ResetPasswordPage: React.FC = () => {
                   required
                   className={`form-input ${error && password !== confirmPassword ? 'error' : ''}`}
                 />
-                {/* <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                >
-                  {/* {showConfirmPassword ? (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                      <line x1="1" y1="1" x2="23" y2="23" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                      <circle cx="12" cy="12" r="3" />
-                    </svg>
-                  )} 
-                </button> */}
               </div>
             </div>
 
