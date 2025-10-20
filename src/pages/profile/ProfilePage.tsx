@@ -262,7 +262,6 @@ const ProfilePage: React.FC = () => {
                 <div className="profile-details">
                     <p><strong>Email:</strong> {displayEmail}</p>
                     <p><strong>Edad:</strong> {displayAge} años</p>
-                    <p><strong>ID:</strong> {user.id}</p>
                 </div>
 
                 <div className="profile-actions">

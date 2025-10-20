@@ -192,6 +192,7 @@ $color-bg-dark: #0a0a0f;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   color: $color-text-white;
   position: relative;
+  margin-top: 6rem;
   animation: scaleIn 0.3s ease-out;
 
   @media (max-width: 768px) {
