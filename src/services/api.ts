@@ -39,10 +39,19 @@ class ApiService {
         },
       });
 
-      const data = await response.json();
+      // Manejar respuestas sin body (204) o sin JSON
+      const contentType = response.headers.get('content-type') || '';
+      let data: any = {};
+
+      if (response.status !== 204 && contentType.includes('application/json')) {
+        // Sólo parseamos JSON cuando el servidor devuelve JSON
+        data = await response.json();
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || data.message_es || 'Error en la petición');
+        // Si el servidor devolvió JSON con mensajes, úsalos; si no, lanza genérico
+        const message = (data && (data.message || data.message_es)) || 'Error en la petición';
+        throw new Error(message);
       }
 
       return data;
@@ -86,6 +95,16 @@ class ApiService {
   }
 
   async forgotPassword(email: string) {
+    // Basic client-side validation
+    if (!email || typeof email !== 'string') {
+      throw new Error('Email inválido');
+    }
+    // Optional: simple email regex
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error('Email inválido');
+    }
+
     return this.request('/users/forgot-password', {
       method: 'POST',
       body: JSON.stringify({ correo: email }),
@@ -93,6 +112,13 @@ class ApiService {
   }
 
   async resetPassword(token: string, nuevaContrasena: string) {
+    if (!token || typeof token !== 'string') {
+      throw new Error('Token inválido');
+    }
+    if (!nuevaContrasena || nuevaContrasena.length < 8) {
+      throw new Error('La nueva contraseña debe tener al menos 8 caracteres');
+    }
+
     return this.request('/users/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token, nuevaContrasena }),

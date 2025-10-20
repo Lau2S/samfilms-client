@@ -77,27 +77,43 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  // ✅ USAR EL API SERVICE EN LUGAR DE FETCH DIRECTO
   const handleForgotPassword = async () => {
     if (!forgotEmail) {
       setForgotMessage('Ingresa un correo válido.');
       return;
     }
+    
     setForgotLoading(true);
     setForgotMessage(null);
+    
     try {
-      const res = await fetch('http://localhost:3000/api/v1/users/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo: forgotEmail }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setForgotMessage(data.message || 'Correo enviado. Revisa tu bandeja.');
+      console.log('📧 Enviando solicitud de recuperación a:', forgotEmail);
+      
+      // ✅ Usar el API service centralizado
+      const response = await api.forgotPassword(forgotEmail);
+      
+      console.log('✅ Respuesta del servidor:', response);
+      
+      if (response.success) {
+        setForgotMessage(
+          response.message || 
+          response.message_es || 
+          'Correo enviado. Revisa tu bandeja de entrada.'
+        );
       } else {
-        setForgotMessage(data.message || 'Ocurrió un error al enviar el correo.');
+        setForgotMessage(
+          response.message || 
+          response.message_es || 
+          'Ocurrió un error al enviar el correo.'
+        );
       }
-    } catch (err: any) {
-      setForgotMessage(err.message || 'Error de red');
+    } catch (error: any) {
+      console.error('❌ Error en forgot password:', error);
+      setForgotMessage(
+        error.message || 
+        'Error al conectar con el servidor. Verifica tu conexión.'
+      );
     } finally {
       setForgotLoading(false);
     }
@@ -206,7 +222,10 @@ const LoginPage: React.FC = () => {
             </button>
 
             <h3>Recuperar contraseña</h3>
-            <p className="modal-sub">Ingresa tu correo y te enviaremos un enlace para restablecer la contraseña.</p>
+            <p className="modal-sub">
+              Ingresa tu correo y te enviaremos un enlace para restablecer la contraseña.
+            </p>
+            
             <input
               type="email"
               placeholder="Tu correo"
@@ -214,6 +233,7 @@ const LoginPage: React.FC = () => {
               onChange={(e) => setForgotEmail(e.target.value)}
               className="form-input"
             />
+            
             <div className="modal-actions">
               <button
                 className="submit-button"
@@ -229,7 +249,10 @@ const LoginPage: React.FC = () => {
                 Cancelar
               </button>
             </div>
-            {forgotMessage && <p className="forgot-message">{forgotMessage}</p>}
+            
+            {forgotMessage && (
+              <p className="forgot-message">{forgotMessage}</p>
+            )}
           </div>
         </div>
       )}
