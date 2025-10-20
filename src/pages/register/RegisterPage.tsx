@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import "./RegisterPage.scss";
 import { Link } from "react-router";
@@ -22,6 +22,25 @@ const RegisterPage: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Password validation
+  const [passwordValidation, setPasswordValidation] = useState({
+    minLength: false,
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSpecialChar: false,
+  });
+
+  useEffect(() => {
+    setPasswordValidation({
+      minLength: formData.password.length >= 8,
+      hasUpperCase: /[A-Z]/.test(formData.password),
+      hasLowerCase: /[a-z]/.test(formData.password),
+      hasNumber: /[0-9]/.test(formData.password),
+      hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password),
+    });
+  }, [formData.password]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -132,7 +151,7 @@ const RegisterPage: React.FC = () => {
                 value={formData.edad}
                 onChange={handleChange}
                 required
-                min="13"
+                min="18"
                 max="120"
                 className="form-input"
               />
@@ -156,18 +175,31 @@ const RegisterPage: React.FC = () => {
                 onClick={() => setShowPassword((s) => !s)}
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
-                {/* {showPassword ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )} */}
+                {/* Iconos comentados */}
               </button>
+              
+              {formData.password && (
+                <div className="password-requirements">
+                  <p>La contraseña debe contener:</p>
+                  <ul>
+                    <li className={passwordValidation.minLength ? 'valid' : ''}>
+                      Al menos 8 caracteres
+                    </li>
+                    <li className={passwordValidation.hasUpperCase ? 'valid' : ''}>
+                      Una letra mayúscula
+                    </li>
+                    <li className={passwordValidation.hasLowerCase ? 'valid' : ''}>
+                      Una letra minúscula
+                    </li>
+                    <li className={passwordValidation.hasNumber ? 'valid' : ''}>
+                      Un número
+                    </li>
+                    <li className={passwordValidation.hasSpecialChar ? 'valid' : ''}>
+                      Un carácter especial (!@#$%^&*...)
+                    </li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Campo de Confirmar Contraseña */}
@@ -188,22 +220,12 @@ const RegisterPage: React.FC = () => {
                 onClick={() => setShowConfirmPassword((s) => !s)}
                 aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
-                {/* {showConfirmPassword ? (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                ) : (
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )} */}
+                {/* Iconos comentados */}
               </button>
             </div>
 
             {/* Botón de Submit */}
-            <button type="submit" className="submit-button">
+            <button type="submit" className="submit-button" >
               Crear Cuenta
             </button>
           </form>
