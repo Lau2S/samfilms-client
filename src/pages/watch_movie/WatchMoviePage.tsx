@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import './WatchMoviePage.scss';
- 
-// Tipado opcional de la película (simulado mientras integras tu API)
+
 interface Movie {
   title: string;
   description: string;
@@ -16,15 +15,18 @@ interface Movie {
 }
 
 const WatchMoviePage: React.FC = () => {
-  const { movieId } = useParams<{ movieId?: string }>(); // obtiene el parámetro desde la URL
+  const { movieId } = useParams<{ movieId?: string }>();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Simulación temporal mientras se integra la API
+  // Estados solo para el front
+  const [userRating, setUserRating] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [comment, setComment] = useState('');
+  const [comments, setComments] = useState<string[]>([]);
+
   useEffect(() => {
     setLoading(true);
-
-    // Simulación: datos locales mientras no se conecta la API
     const fakeMovie: Movie = {
       title: 'Seven',
       description:
@@ -40,17 +42,6 @@ const WatchMoviePage: React.FC = () => {
       videoUrl:
         'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
     };
-
-    // Aquí iría el fetch real cuando tengas tu API:
-    /*
-    fetch(`https://tu-api.com/movies/${movieId}`)
-      .then(res => res.json())
-      .then(data => setMovie(data))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
-    */
-
-    // Mientras no hay API, simulamos carga
     setTimeout(() => {
       setMovie(fakeMovie);
       setLoading(false);
@@ -60,6 +51,16 @@ const WatchMoviePage: React.FC = () => {
   if (loading) return <div className="loading">Cargando...</div>;
   if (!movie) return <div className="error">Película no encontrada</div>;
 
+  const handleRating = (star: number) => setUserRating(star);
+  const handleFavorite = () => setIsFavorite((prev) => !prev);
+  const handleCommentSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (comment.trim()) {
+      setComments([...comments, comment]);
+      setComment('');
+    }
+  };
+
   return (
     <div className="watch-movie-page">
       <div className="movie-header">
@@ -67,11 +68,31 @@ const WatchMoviePage: React.FC = () => {
         <div className="movie-info">
           <h1>{movie.title}</h1>
           <p>{movie.description}</p>
-          <div className="rating">
-            {[...Array(movie.rating)].map((_, i) => (
-              <span key={i}>★</span>
-            ))}
+
+          <div className="rating-section">
+            <div className="stars">
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star}
+                  className={`star-btn${userRating >= star ? ' rated' : ''}`}
+                  onClick={() => handleRating(star)}
+                  aria-label={`Calificación ${star} estrellas`}
+                >★</button>
+              ))}
+            </div>
+            {userRating > 0 && (
+              <span className="my-rating">Tu calificación: {userRating}</span>
+            )}
           </div>
+
+          <button
+            className={`fav-btn${isFavorite ? ' fav' : ''}`}
+            onClick={handleFavorite}
+          >
+            {isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+          </button>
+
+        
           <p>Director: <a href="#">{movie.director}</a></p>
           <p>Género: {movie.genre}</p>
           <p>Año: {movie.year}</p>
@@ -79,10 +100,31 @@ const WatchMoviePage: React.FC = () => {
       </div>
 
       <div className="movie-player">
-        <video width="100%" height="360" poster={movie.backdrop} controls>
+        <video width="100%" height="380" poster={movie.backdrop} controls>
           <source src={movie.videoUrl} type="video/mp4" />
           Tu navegador no soporta la reproducción de video.
         </video>
+      </div>
+
+      <div className="comments-section">
+        <h2>Comentarios</h2>
+        <form onSubmit={handleCommentSubmit} className="comment-form">
+          <textarea
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            placeholder="Escribe tu comentario aquí..."
+            rows={4}
+            required
+          />
+          <button type="submit" className="add-comment-btn">
+            Añadir comentario
+          </button>
+        </form>
+        <ul className="comments-list">
+          {comments.map((c, idx) => (
+            <li key={idx} className="comment-item">{c}</li>
+          ))}
+        </ul>
       </div>
     </div>
   );
