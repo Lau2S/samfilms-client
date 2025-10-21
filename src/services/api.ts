@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
 interface ApiResponse<T = any> {
@@ -254,5 +256,82 @@ export const getUsers = async () => {
   const res = await api.getUsers();
   return res?.data ?? res;
 };
+
+// =========================
+// TMDb SERVICE
+// =========================
+const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
+
+export const TMDbService = {
+  async getPopularMovies() {
+    const res = await axios.get(`${TMDB_BASE_URL}/movie/popular`, {
+      params: { api_key: TMDB_API_KEY, language: 'es-ES', page: 1 },
+    });
+    return res.data.results;
+  },
+
+  async getMovieById(id: string) {
+    const res = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
+      params: { api_key: TMDB_API_KEY, language: 'es-ES' },
+    });
+    return res.data;
+  },
+
+  async getMoviesByGenre(genreId: number) {
+    const res = await axios.get(`${TMDB_BASE_URL}/discover/movie`, {
+      params: { api_key: TMDB_API_KEY, with_genres: genreId, language: 'es-ES' },
+    });
+    return res.data.results;
+  },
+
+  async searchMovies(query: string) {
+    const res = await axios.get(`${TMDB_BASE_URL}/search/movie`, {
+      params: { api_key: TMDB_API_KEY, query, language: 'es-ES' },
+    });
+    return res.data.results;
+  },
+
+  // 🧠 Lo que usaremos para el WatchMoviePage
+  async getMovieVideos(id: string) {
+    const res = await axios.get(`${TMDB_BASE_URL}/movie/${id}/videos`, {
+      params: { api_key: TMDB_API_KEY, language: 'es-ES' },
+    });
+    return res.data.results.filter((v: any) => v.site === 'YouTube' && v.type === 'Trailer');
+  },
+  async getMovieDetails(id: string) {
+    const res = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
+      params: { 
+        api_key: TMDB_API_KEY,
+        language: 'es-ES',
+      },
+    });
+    return res.data;
+  },
+};
+// =========================
+// YouTube SERVICE
+// =========================
+const YT_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+const YT_BASE_URL = 'https://www.googleapis.com/youtube/v3';
+
+export const YouTubeService = {
+  async searchTrailer(title: string) {
+    const res = await axios.get(`${YT_BASE_URL}/search`, {
+      params: {
+        key: YT_API_KEY,
+        q: `${title} trailer oficial`,
+        part: 'snippet',
+        type: 'video',
+        maxResults: 1,
+      },
+    });
+    if (res.data.items.length > 0) {
+      return res.data.items[0];
+    }
+    return null;
+  },
+};
+
 
 export default api;
