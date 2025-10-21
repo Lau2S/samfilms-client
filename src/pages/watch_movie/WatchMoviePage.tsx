@@ -1,73 +1,232 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router';
+import { useParams, useNavigate } from 'react-router';
+import api from '../../services/api';
 import './WatchMoviePage.scss';
 
 interface Movie {
-  title: string;
-  description: string;
-  year: number;
-  poster: string;
-  director: string;
-  genre: string;
-  rating: number;
-  backdrop: string;
-  videoUrl: string;
+  id: number;
+  nombre: string;
+  sinopsis?: string;
+  fecha_lanzamiento?: string;
+  calificacion?: number;
+  imagen_url: string | null;
+  genero_ids?: number[];
+}
+
+interface Comment {
+  id: string;
+  contenido: string;
+  usuario_id: string;
+  created_at: string;
 }
 
 const WatchMoviePage: React.FC = () => {
-  const { movieId } = useParams<{ movieId?: string }>();
+  const { movieId } = useParams<{ movieId: string }>();
+  const navigate = useNavigate();
   const [movie, setMovie] = useState<Movie | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Estados solo para el front
+  // User interaction states
   const [userRating, setUserRating] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [comment, setComment] = useState('');
-  const [comments, setComments] = useState<string[]>([]);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
+  const [loadingComments, setLoadingComments] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    const fakeMovie: Movie = {
-      title: 'Seven',
-      description:
-        'Dos detectives, el veterano Somerset y su compañero Mills, persiguen a un asesino en serie cuyos crímenes están inspirados en los siete pecados capitales.',
-      year: 1995,
-      poster:
-        'https://a.ltrbxd.com/resized/film-poster/5/1/3/4/5/51345-se7en-0-1000-0-1500-crop.jpg?v=76a14ef6b4',
-      director: 'David Fincher',
-      genre: 'Suspenso',
-      rating: 5,
-      backdrop:
-        'https://i.pinimg.com/1200x/2b/c3/da/2bc3daf2de7ae4f76dbcfcb6a759a2a0.jpg',
-      videoUrl:
-        'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
-    };
-    setTimeout(() => {
-      setMovie(fakeMovie);
-      setLoading(false);
-    }, 800);
+    if (movieId) {
+      loadMovie();
+      checkFavoriteStatus();
+      loadComments();
+    }
   }, [movieId]);
 
-  if (loading) return <div className="loading">Cargando...</div>;
-  if (!movie) return <div className="error">Película no encontrada</div>;
+  const loadMovie = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const handleRating = (star: number) => setUserRating(star);
-  const handleFavorite = () => setIsFavorite((prev) => !prev);
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (comment.trim()) {
-      setComments([...comments, comment]);
-      setComment('');
+      const response: any = await api.getMovieById(movieId!);
+      
+      if (response.success && response.data) {
+        setMovie(response.data);
+      } else {
+        setError('No se pudo cargar la película');
+      }
+    } catch (err: any) {
+      console.error('❌ Error cargando película:', err);
+      setError(err.message || 'Error al cargar la película');
+    } finally {
+      setLoading(false);
     }
   };
+
+  const checkFavoriteStatus = async () => {
+    try {
+      const response: any = await api.checkIfFavorite(movieId!);
+      if (response.success) {
+        setIsFavorite(response.data?.isFavorite || false);
+      }
+    } catch (err) {
+      console.log('No se pudo verificar favorito (puede que no esté autenticado)');
+    }
+  };
+
+  const loadComments = async () => {
+    try {
+      setLoadingComments(true);
+      const response: any = await api.getCommentsByMovie(movieId!);
+      
+      if (response.success && response.data) {
+        setComments(response.data);
+      }
+    } catch (err) {
+      console.log('No se pudieron cargar comentarios');
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleRating = (star: number) => {
+    setUserRating(star);
+    // Aquí podrías guardar la calificación en el backend si tienes ese endpoint
+    console.log(`Usuario calificó con ${star} estrellas`);
+  };
+
+  const handleFavorite = async () => {
+    try {
+      setLoadingFavorite(true);
+
+      if (isFavorite) {
+        const response = await api.removeFromFavorites(movieId!);
+        if (response.success) {
+          setIsFavorite(false);
+          console.log('✅ Eliminado de favoritos');
+        }
+      } else {
+        const response = await api.addToFavorites(movieId!);
+        if (response.success) {
+          setIsFavorite(true);
+          console.log('✅ Agregado a favoritos');
+        }
+      }
+    } catch (err: any) {
+      console.error('❌ Error al manejar favorito:', err);
+      alert(err.message || 'Error al actualizar favoritos');
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!comment.trim()) return;
+
+    try {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+      if (!user.id) {
+        alert('Debes iniciar sesión para comentar');
+        return;
+      }
+
+      const response = await api.createComment({
+        usuario_id: user.id,
+        pelicula_id: movieId!,
+        contenido: comment.trim()
+      });
+
+      if (response.success) {
+        setComment('');
+        loadComments(); // Recargar comentarios
+        console.log('✅ Comentario agregado');
+      }
+    } catch (err: any) {
+      console.error('❌ Error al agregar comentario:', err);
+      alert(err.message || 'Error al agregar comentario');
+    }
+  };
+
+  const getYear = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).getFullYear();
+  };
+
+  const getDefaultPoster = () => {
+    return 'https://via.placeholder.com/300x450/8b5cf6/ffffff?text=Sin+Imagen';
+  };
+
+  const getDefaultBackdrop = () => {
+    return 'https://via.placeholder.com/1280x720/8b5cf6/ffffff?text=Sin+Video';
+  };
+
+  if (loading) {
+    return (
+      <div className="watch-movie-page">
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '60vh',
+          color: '#fff',
+          fontSize: '1.5rem'
+        }}>
+          Cargando película...
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !movie) {
+    return (
+      <div className="watch-movie-page">
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '60vh',
+          color: '#ff5252',
+          fontSize: '1.25rem',
+          gap: '1rem'
+        }}>
+          <p>❌ {error || 'Película no encontrada'}</p>
+          <button
+            onClick={() => navigate('/peliculas')}
+            style={{
+              padding: '0.75rem 2rem',
+              background: '#8b5cf6',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            Volver a Películas
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="watch-movie-page">
       <div className="movie-header">
-        <img className="movie-poster" src={movie.poster} alt={movie.title} />
+        <img 
+          className="movie-poster" 
+          src={movie.imagen_url || getDefaultPoster()} 
+          alt={movie.nombre}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = getDefaultPoster();
+          }}
+        />
         <div className="movie-info">
-          <h1>{movie.title}</h1>
-          <p>{movie.description}</p>
+          <h1>{movie.nombre}</h1>
+          <p>{movie.sinopsis || 'Sin descripción disponible'}</p>
 
           <div className="rating-section">
             <div className="stars">
@@ -83,27 +242,46 @@ const WatchMoviePage: React.FC = () => {
             {userRating > 0 && (
               <span className="my-rating">Tu calificación: {userRating}</span>
             )}
+            {movie.calificacion && (
+              <span className="my-rating">
+                TMDb: {movie.calificacion.toFixed(1)}/10
+              </span>
+            )}
           </div>
 
           <button
             className={`fav-btn${isFavorite ? ' fav' : ''}`}
             onClick={handleFavorite}
+            disabled={loadingFavorite}
           >
-            {isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+            {loadingFavorite ? 'Cargando...' : (isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos')}
           </button>
 
-        
-          <p>Director: <a href="#">{movie.director}</a></p>
-          <p>Género: {movie.genre}</p>
-          <p>Año: {movie.year}</p>
+          <p>Año: {getYear(movie.fecha_lanzamiento)}</p>
+          {movie.genero_ids && movie.genero_ids.length > 0 && (
+            <p>Géneros: {movie.genero_ids.join(', ')}</p>
+          )}
         </div>
       </div>
 
       <div className="movie-player">
-        <video width="100%" height="380" poster={movie.backdrop} controls>
-          <source src={movie.videoUrl} type="video/mp4" />
+        <video 
+          width="100%" 
+          height="380" 
+          poster={movie.imagen_url || getDefaultBackdrop()} 
+          controls
+        >
+          <source src="#" type="video/mp4" />
           Tu navegador no soporta la reproducción de video.
         </video>
+        <div style={{
+          textAlign: 'center',
+          marginTop: '1rem',
+          color: 'rgba(255,255,255,0.6)',
+          fontSize: '0.9rem'
+        }}>
+          ℹ️ Video de demostración. Integra con tu proveedor de streaming.
+        </div>
       </div>
 
       <div className="comments-section">
@@ -120,11 +298,27 @@ const WatchMoviePage: React.FC = () => {
             Añadir comentario
           </button>
         </form>
-        <ul className="comments-list">
-          {comments.map((c, idx) => (
-            <li key={idx} className="comment-item">{c}</li>
-          ))}
-        </ul>
+
+        {loadingComments ? (
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)' }}>
+            Cargando comentarios...
+          </p>
+        ) : comments.length > 0 ? (
+          <ul className="comments-list">
+            {comments.map((c) => (
+              <li key={c.id} className="comment-item">
+                <div style={{ fontSize: '0.85em', color: '#aaa', marginBottom: '0.25rem' }}>
+                  {new Date(c.created_at).toLocaleDateString()}
+                </div>
+                {c.contenido}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.6)', marginTop: '1rem' }}>
+            No hay comentarios aún. ¡Sé el primero en comentar!
+          </p>
+        )}
       </div>
     </div>
   );

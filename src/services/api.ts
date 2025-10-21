@@ -150,10 +150,62 @@ class ApiService {
     }, true);
   }
 
-  // ========== PELÍCULAS ==========
+  // // ========== PELÍCULAS ==========
   
-  async getMovies() {
-    return this.request('/movies', { method: 'GET' });
+  // async getMovies() {
+  //   return this.request('/movies', { method: 'GET' });
+  // }
+
+  // async getMovieById(id: string) {
+  //   return this.request(`/movies/${id}`, { method: 'GET' });
+  // }
+
+  // async searchMovies(nombre: string) {
+  //   return this.request(`/movies/search/${nombre}`, { method: 'GET' });
+  // }
+
+  // async getMoviesByGenre(genero: string) {
+  //   return this.request(`/movies/genero/${genero}`, { method: 'GET' });
+  // }
+
+  // // ========== FAVORITOS ==========
+  
+  // async getFavorites() {
+  //   return this.request('/favorites', { method: 'GET' }, true);
+  // }
+
+  // async addToFavorites(movieId: string) {
+  //   return this.request('/favorites', {
+  //     method: 'POST',
+  //     body: JSON.stringify({ movieId }),
+  //   }, true);
+  // }
+
+  // async removeFromFavorites(movieId: string) {
+  //   return this.request(`/favorites/${movieId}`, {
+  //     method: 'DELETE',
+  //   }, true);
+  // }
+
+  // async checkIfFavorite(movieId: string) {
+  //   return this.request(`/favorites/check/${movieId}`, {
+  //     method: 'GET',
+  //   }, true);
+  // }
+
+  // async getFavoritesStats() {
+  //   return this.request('/favorites/stats', { method: 'GET' }, true);
+  // }
+
+  // async clearAllFavorites() {
+  //   return this.request('/favorites', { method: 'DELETE' }, true);
+  // }
+
+  // ========== PELÍCULAS - TMDB ==========
+  
+  async getMovies(limit?: number) {
+    const params = limit ? `?limit=${limit}` : '';
+    return this.request(`/movies${params}`, { method: 'GET' });
   }
 
   async getMovieById(id: string) {
@@ -161,11 +213,16 @@ class ApiService {
   }
 
   async searchMovies(nombre: string) {
-    return this.request(`/movies/search/${nombre}`, { method: 'GET' });
+    return this.request(`/movies/search/${encodeURIComponent(nombre)}`, { 
+      method: 'GET' 
+    });
   }
 
-  async getMoviesByGenre(genero: string) {
-    return this.request(`/movies/genero/${genero}`, { method: 'GET' });
+  async getMoviesByGenre(genero: string, limit?: number) {
+    const params = limit ? `?limit=${limit}` : '';
+    return this.request(`/movies/genero/${encodeURIComponent(genero)}${params}`, { 
+      method: 'GET' 
+    });
   }
 
   // ========== FAVORITOS ==========
@@ -197,7 +254,7 @@ class ApiService {
     return this.request('/favorites/stats', { method: 'GET' }, true);
   }
 
-  async clearAllFavorites() {
+   async clearAllFavorites() {
     return this.request('/favorites', { method: 'DELETE' }, true);
   }
 
