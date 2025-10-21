@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import api from '../../services/api';
 import './MoviesPage.scss';
+import CatalogPage from '../catalog/CatalogMoviesPage';
 
 interface Movie {
   id: number;
-  title: string;
-  year: number;
-  poster: string;
+  nombre: string;
+  sinopsis?: string;
+  fecha_lanzamiento?: string;
+  calificacion?: number;
+  imagen_url: string | null;
+  genero_ids?: number[];
 }
 
 interface HeroMovie {
@@ -18,9 +23,15 @@ interface HeroMovie {
 
 const MoviesPage: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
+  const [comedyMovies, setComedyMovies] = useState<Movie[]>([]);
+  const [actionMovies, setActionMovies] = useState<Movie[]>([]);
+  const [thrillerMovies, setThrillerMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Hero movies for carousel
+  // Hero movies estáticos para el carrusel (puedes mantenerlos o cargarlos dinámicamente)
   const heroMovies: HeroMovie[] = [
     {
       id: 1,
@@ -42,39 +53,52 @@ const MoviesPage: React.FC = () => {
     }
   ];
 
-  // Movies by genre
-  const dramaMovies: Movie[] = [
-    { id: 1, title: 'Spider-Man', year: 2002, poster: 'https://a.ltrbxd.com/resized/film-poster/5/1/5/6/1/51561-spider-man-0-1000-0-1500-crop.jpg?v=a7394840f4' },
-    { id: 2, title: 'Pulp Fiction', year: 1994, poster: 'https://a.ltrbxd.com/resized/film-poster/5/1/4/4/4/51444-pulp-fiction-0-1000-0-1500-crop.jpg?v=dee19a8077' },
-    { id: 3, title: 'The Godfather', year: 1972, poster: 'https://a.ltrbxd.com/resized/film-poster/5/1/8/1/8/51818-the-godfather-0-1000-0-1500-crop.jpg?v=bca8b67402' },
-    { id: 4, title: 'Kill Bill', year: 2003, poster: 'https://a.ltrbxd.com/resized/sm/upload/sw/w2/ep/v4/9O50TVszkz0dcP5g6Ej33UhR7vw-0-1000-0-1500-crop.jpg?v=5a65f5202f' },
-    { id: 5, title: 'Forrest Gump', year: 1994, poster: 'https://a.ltrbxd.com/resized/film-poster/2/7/0/4/2704-forrest-gump-0-1000-0-1500-crop.jpg?v=173bc04cf0' },
-    { id: 6, title: 'The Truman Show', year: 1998, poster: 'https://a.ltrbxd.com/resized/sm/upload/xx/io/jp/45/the-truman-show-0-1000-0-1500-crop.jpg?v=704ba393f7' }
-  ];
+  useEffect(() => {
+    loadMovies();
+  }, []);
 
-  const actionMovies: Movie[] = [
-    { id: 7, title: 'Léon: The Professional', year: 1994, poster: 'https://a.ltrbxd.com/resized/sm/upload/6x/vq/25/fy/gE8S02QUOhVnAmYu4tcrBlMTujz-0-1000-0-1500-crop.jpg?v=f72423fa1f' },
-    { id: 8, title: 'Django Unchained', year: 2012, poster: 'https://a.ltrbxd.com/resized/film-poster/5/2/5/1/6/52516-django-unchained-0-1000-0-1500-crop.jpg?v=f02aed63a3' },
-    { id: 9, title: 'Old Boy', year: 2003, poster: 'https://a.ltrbxd.com/resized/film-poster/5/1/4/5/4/51454-oldboy-0-1000-0-1500-crop.jpg?v=294dbcadef' },
-    { id: 10, title: 'Dead Poets Society', year: 1989, poster: 'https://a.ltrbxd.com/resized/film-poster/5/1/8/4/6/51846-dead-poets-society-0-1000-0-1500-crop.jpg?v=9273e8acf7' },
-    { id: 11, title: 'La La Land', year: 2016, poster: 'https://a.ltrbxd.com/resized/film-poster/2/4/0/3/4/4/240344-la-la-land-0-1000-0-1500-crop.jpg?v=053670ff84' },
-    { id: 12, title: 'Requiem for a Dream', year: 2000, poster: 'https://a.ltrbxd.com/resized/sm/upload/lv/4b/f2/zj/muym4jTjdLx7E6as09d1wlC3sOB-0-1000-0-1500-crop.jpg?v=b4d5a4aa37' }
-  ];
+  const loadMovies = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const thrillerMovies: Movie[] = [
-    { id: 13, title: 'The Silence of the Lambs', year: 1991, poster: 'https://a.ltrbxd.com/resized/film-poster/5/1/7/8/2/51782-the-silence-of-the-lambs-0-1000-0-1500-crop.jpg?v=18d88bdff4' },
-    { id: 14, title: 'Se7en', year: 1995, poster: 'https://a.ltrbxd.com/resized/film-poster/5/1/3/4/5/51345-se7en-0-1000-0-1500-crop.jpg?v=76a14ef6b4' },
-    { id: 15, title: 'Fight Club', year: 1999, poster: 'https://a.ltrbxd.com/resized/film-poster/5/1/5/6/8/51568-fight-club-0-1000-0-1500-crop.jpg?v=768b32dfa4' },
-    { id: 16, title: 'Shutter Island', year: 2010, poster: 'https://a.ltrbxd.com/resized/film-poster/4/5/4/0/9/45409-shutter-island-0-1000-0-1500-crop.jpg?v=85dd4c38e3' },
-    { id: 17, title: 'Gone Girl', year: 2014, poster: 'https://a.ltrbxd.com/resized/film-poster/1/4/9/8/5/7/149857-gone-girl-0-1000-0-1500-crop.jpg?v=dfe3c8018b' },
-    { id: 18, title: 'Prisoners', year: 2013, poster: 'https://a.ltrbxd.com/resized/sm/upload/iw/eg/4g/nm/3w79tTsv6tmlT8Jww6snyPrgVok-0-1000-0-1500-crop.jpg?v=778c7ae8b8' }
-  ];
+      // Cargar películas populares
+      const popularResponse: any = await api.getMovies(12);
+      if (popularResponse.success && popularResponse.data) {
+        setPopularMovies(popularResponse.data);
+      }
+
+      // Cargar películas de Comedia
+      const comedyResponse: any = await api.getMoviesByGenre('Comedia', 12);
+      if (comedyResponse.success && comedyResponse.data) {
+        setComedyMovies(comedyResponse.data);
+      }
+
+      // Cargar películas de Acción
+      const actionResponse: any = await api.getMoviesByGenre('Acción', 12);
+      if (actionResponse.success && actionResponse.data) {
+        setActionMovies(actionResponse.data);
+      }
+
+      // Cargar películas de Thriller
+      const thrillerResponse: any = await api.getMoviesByGenre('Suspense', 12);
+      if (thrillerResponse.success && thrillerResponse.data) {
+        setThrillerMovies(thrillerResponse.data);
+      }
+
+    } catch (err: any) {
+      console.error('❌ Error cargando películas:', err);
+      setError(err.message || 'Error al cargar las películas');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Auto-advance carousel
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroMovies.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [heroMovies.length]);
@@ -94,6 +118,59 @@ const MoviesPage: React.FC = () => {
   const handleMovieClick = (movieId: number) => {
     navigate(`/peliculas/${movieId}`);
   };
+
+  const getYear = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).getFullYear();
+  };
+
+  const getDefaultPoster = () => {
+    return 'https://via.placeholder.com/300x450/8b5cf6/ffffff?text=Sin+Imagen';
+  };
+
+  if (loading) {
+    return (
+      <div className="movies-page">
+        <div className="loading-state">
+          <div className="spinner"></div>
+          <p>Cargando peliculas...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="movies-page">
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          justifyContent: 'center', 
+          alignItems: 'center',
+          minHeight: '80vh',
+          color: '#ff5252',
+          fontSize: '1.25rem',
+          gap: '1rem'
+        }}>
+          <p>❌ {error}</p>
+          <button 
+            onClick={loadMovies}
+            style={{
+              padding: '0.75rem 2rem',
+              background: '#8b5cf6',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '1rem'
+            }}
+          >
+            Reintentar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="movies-page">
@@ -118,7 +195,6 @@ const MoviesPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Navigation Arrows */}
         <button className="carousel-arrow prev" onClick={prevSlide} aria-label="Anterior">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6" />
@@ -130,7 +206,6 @@ const MoviesPage: React.FC = () => {
           </svg>
         </button>
 
-        {/* Dots Navigation */}
         <div className="carousel-dots">
           {heroMovies.map((_, index) => (
             <button
@@ -145,89 +220,137 @@ const MoviesPage: React.FC = () => {
 
       {/* Movies Content */}
       <div className="movies-content">
-        {/* Drama Section */}
-        <section className="genre-section">
-          <div className="genre-header">
-            <h2 className="genre-title">Drama</h2>
-            <button className="view-all-btn">Ver Todos</button>
-          </div>
-          <div className="movies-grid">
-            {dramaMovies.map((movie) => (
-              <div 
-              key={movie.id} 
-              className="movie-card"
-              onClick={() => handleMovieClick(movie.id)}
-              style={{ cursor: 'pointer' }}
-              >
-                <img 
-                  src={movie.poster} 
-                  alt={movie.title} 
-                  className="movie-poster"
-                />
-                <div className="movie-overlay">
-                  <h3 className="movie-title">{movie.title}</h3>
-                  <p className="movie-year">{movie.year}</p>
+        {/* Películas Populares */}
+        {popularMovies.length > 0 && (
+          <section className="genre-section">
+            <div className="genre-header">
+              <h2 className="genre-title">Populares</h2>
+              <button onClick={() => navigate('/catalogo')} className="view-all-btn">Ver Todos</button>
+            </div>
+            <div className="movies-grid">
+              {popularMovies.map((movie) => (
+                <div 
+                  key={movie.id} 
+                  className="movie-card"
+                  onClick={() => handleMovieClick(movie.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img 
+                    src={movie.imagen_url || getDefaultPoster()} 
+                    alt={movie.nombre} 
+                    className="movie-poster"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = getDefaultPoster();
+                    }}
+                  />
+                  <div className="movie-overlay">
+                    <h3 className="movie-title">{movie.nombre}</h3>
+                    <p className="movie-year">{getYear(movie.fecha_lanzamiento)}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Comedia Section */}
+        {comedyMovies.length > 0 && (
+          <section className="genre-section">
+            <div className="genre-header">
+              <h2 className="genre-title">Comedia</h2>
+              <button onClick={() => navigate('/catalogo?genero=Comedia')} className="view-all-btn">Ver Todos</button>
+            </div>
+            <div className="movies-grid">
+              {comedyMovies.map((movie) => (
+                <div 
+                  key={movie.id} 
+                  className="movie-card"
+                  onClick={() => handleMovieClick(movie.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img 
+                    src={movie.imagen_url || getDefaultPoster()} 
+                    alt={movie.nombre} 
+                    className="movie-poster"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = getDefaultPoster();
+                    }}
+                  />
+                  <div className="movie-overlay">
+                    <h3 className="movie-title">{movie.nombre}</h3>
+                    <p className="movie-year">{getYear(movie.fecha_lanzamiento)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Action Section */}
-        <section className="genre-section">
-          <div className="genre-header">
-            <h2 className="genre-title">Acción</h2>
-            <button className="view-all-btn">Ver Todos</button>
-          </div>
-          <div className="movies-grid">
-            {actionMovies.map((movie) => (
-              <div 
-              key={movie.id} 
-              className="movie-card"
-              onClick={() => handleMovieClick(movie.id)}
-              style={{ cursor: 'pointer' }}
-              >
-                <img 
-                  src={movie.poster} 
-                  alt={movie.title} 
-                  className="movie-poster"
-                />
-                <div className="movie-overlay">
-                  <h3 className="movie-title">{movie.title}</h3>
-                  <p className="movie-year">{movie.year}</p>
+        {actionMovies.length > 0 && (
+          <section className="genre-section">
+            <div className="genre-header">
+              <h2 className="genre-title">Acción</h2>
+              <button onClick={() => navigate('/catalogo?genero=Acción')} className="view-all-btn">Ver Todos</button>
+            </div>
+            <div className="movies-grid">
+              {actionMovies.map((movie) => (
+                <div 
+                  key={movie.id} 
+                  className="movie-card"
+                  onClick={() => handleMovieClick(movie.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img 
+                    src={movie.imagen_url || getDefaultPoster()} 
+                    alt={movie.nombre} 
+                    className="movie-poster"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = getDefaultPoster();
+                    }}
+                  />
+                  <div className="movie-overlay">
+                    <h3 className="movie-title">{movie.nombre}</h3>
+                    <p className="movie-year">{getYear(movie.fecha_lanzamiento)}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Thriller Section */}
-        <section className="genre-section">
-          <div className="genre-header">
-            <h2 className="genre-title">Thriller</h2>
-            <button className="view-all-btn">Ver Todos</button>
-          </div>
-          <div className="movies-grid">
-            {thrillerMovies.map((movie) => (
-              <div 
-              key={movie.id} 
-              className="movie-card"
-              onClick={() => handleMovieClick(movie.id)}
-              style={{ cursor: 'pointer' }}
-              >
-                <img 
-                  src={movie.poster} 
-                  alt={movie.title} 
-                  className="movie-poster"
-                />
-                <div className="movie-overlay">
-                  <h3 className="movie-title">{movie.title}</h3>
-                  <p className="movie-year">{movie.year}</p>
+        {thrillerMovies.length > 0 && (
+          <section className="genre-section">
+            <div className="genre-header">
+              <h2 className="genre-title">Thriller</h2>
+              <button onClick={() => navigate('/catalogo?genero=Suspense')} className="view-all-btn">Ver Todos</button>
+            </div>
+            <div className="movies-grid">
+              {thrillerMovies.map((movie) => (
+                <div 
+                  key={movie.id} 
+                  className="movie-card"
+                  onClick={() => handleMovieClick(movie.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <img 
+                    src={movie.imagen_url || getDefaultPoster()} 
+                    alt={movie.nombre} 
+                    className="movie-poster"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = getDefaultPoster();
+                    }}
+                  />
+                  <div className="movie-overlay">
+                    <h3 className="movie-title">{movie.nombre}</h3>
+                    <p className="movie-year">{getYear(movie.fecha_lanzamiento)}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
