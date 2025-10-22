@@ -5,7 +5,7 @@ import './FavoritesPage.scss';
 
 interface FavoriteMovie {
   id: string;
-  pelicula_id: string;
+  pelicula_id?: string | null;
   usuario_id: string;
   created_at: string;
   movie?: {
@@ -15,6 +15,9 @@ interface FavoriteMovie {
     fecha_lanzamiento?: string;
     calificacion?: number;
   };
+  // Algunos backends devuelven tmdb_id u otros campos
+  movie_id?: string | null;
+  tmdb_id?: number | null;
 }
 
 const FavoritesPage: React.FC = () => {
@@ -36,7 +39,36 @@ const FavoritesPage: React.FC = () => {
       const response: any = await api.getFavorites();
       
       if (response.success && response.data) {
-        setFavorites(response.data);
+        // Si el backend no incluye el objeto `movie` en cada favorito,
+        // consultamos los detalles de la película y enriquecemos el array
+        const rawFavorites: FavoriteMovie[] = response.data;
+
+        const enriched = await Promise.all(rawFavorites.map(async (f) => {
+          if (f.movie) return f;
+
+          // Determinar el id de la película que tenemos en el favorito
+          const candidateId = f.pelicula_id ?? f.movie_id ?? f.tmdb_id ?? null;
+          if (!candidateId) return f;
+
+          try {
+            const movieResp: any = await api.getMovieById(String(candidateId));
+            // El backend puede devolver { success, data } o directamente el objeto movie
+            if (movieResp) {
+              if (movieResp.success && movieResp.data) {
+                return { ...f, movie: movieResp.data } as FavoriteMovie;
+              }
+              // Si la respuesta no está envuelta, aceptamos el objeto como movie
+              if (movieResp.id || movieResp.nombre) {
+                return { ...f, movie: movieResp } as FavoriteMovie;
+              }
+            }
+          } catch (err) {
+            console.warn('No se pudo cargar movie details for', candidateId, err);
+          }
+          return f;
+        }));
+
+        setFavorites(enriched);
       } else {
         setError('No se pudieron cargar los favoritos');
       }
@@ -54,11 +86,15 @@ const FavoritesPage: React.FC = () => {
     }
 
     try {
-      setRemovingId(movieId);
-      const response = await api.removeFromFavorites(movieId);
-      
+      // movieId puede venir como pelicula_id o tmdb_id
+      setRemovingId(String(movieId));
+
+      const response = await api.removeFromFavorites(String(movieId));
+
       if (response.success) {
-        setFavorites(favorites.filter(fav => fav.pelicula_id !== movieId));
+        // Filtrar por los posibles campos que mapean al id de la película
+        const idToRemove = String(movieId);
+        setFavorites(favorites.filter(fav => String(fav.pelicula_id ?? fav.movie_id ?? fav.tmdb_id ?? fav.movie?.id ?? fav.id) !== idToRemove));
         console.log('✅ Eliminado de favoritos');
       }
     } catch (err: any) {
@@ -71,6 +107,11 @@ const FavoritesPage: React.FC = () => {
 
   const handleMovieClick = (movieId: string) => {
     navigate(`/peliculas/${movieId}`);
+  };
+
+  const movieIdFromFavorite = (f: FavoriteMovie) => {
+    // Priorizar movie.id, luego pelicula_id, movie_id, tmdb_id
+    return String(f.movie?.id ?? f.pelicula_id ?? f.movie_id ?? f.tmdb_id ?? f.id);
   };
 
   const getYear = (dateString?: string) => {
@@ -95,13 +136,20 @@ const FavoritesPage: React.FC = () => {
 
   return (
     <div className="favorites-page">
+      
       <div className="favorites-header">
         <h1 className="favorites-title">Mis Favoritos</h1>
-        <p className="favorites-subtitle">
-          {favorites.length > 0 
-            ? `Tienes ${favorites.length} película${favorites.length !== 1 ? 's' : ''} en favoritos`
-            : 'Aún no has agregado películas a favoritos'}
-        </p>
+        {/* Mostrar sólo los favoritos que tengan la info de película cargada */}
+        {(() => {
+          const displayed = favorites.filter(f => f.movie);
+          return (
+            <p className="favorites-subtitle">
+              {displayed.length > 0
+                ? `Tienes ${displayed.length} película${displayed.length !== 1 ? 's' : ''} en favoritos`
+                : 'Aún no has agregado películas a favoritos'}
+            </p>
+          );
+        })()}
       </div>
 
       {error ? (
@@ -111,17 +159,16 @@ const FavoritesPage: React.FC = () => {
             Reintentar
           </button>
         </div>
-      ) : favorites.length > 0 ? (
+      ) : favorites.filter(f => f.movie).length > 0 ? (
         <div className="favorites-grid">
-          {favorites.map((favorite) => {
-            const movie = favorite.movie;
-            if (!movie) return null;
+          {favorites.filter(f => f.movie).map((favorite) => {
+            const movie = favorite.movie!;
 
             return (
               <div key={favorite.id} className="favorite-card">
                 <div 
                   className="favorite-poster-container"
-                  onClick={() => handleMovieClick(favorite.pelicula_id)}
+                  onClick={() => handleMovieClick(movieIdFromFavorite(favorite))}
                 >
                   <img
                     src={movie.imagen_url || getDefaultPoster()}
@@ -146,8 +193,8 @@ const FavoritesPage: React.FC = () => {
 
                 <button
                   className="remove-btn"
-                  onClick={() => handleRemoveFavorite(favorite.pelicula_id)}
-                  disabled={removingId === favorite.pelicula_id}
+                  onClick={() => handleRemoveFavorite(movieIdFromFavorite(favorite))}
+                  disabled={removingId === movieIdFromFavorite(favorite)}
                 >
                   {removingId === favorite.pelicula_id ? (
                     <span className="spinner-small"></span>

@@ -53,7 +53,8 @@ class ApiService {
       if (!response.ok) {
         // Si el servidor devolvió JSON con mensajes, úsalos; si no, lanza genérico
         const message = (data && (data.message || data.message_es)) || 'Error en la petición';
-        throw new Error(message);
+        // Añadimos endpoint y status al error para facilitar el debugging desde el front
+        throw new Error(`${message} (endpoint: ${endpoint}, status: ${response.status})`);
       }
 
       return data;
