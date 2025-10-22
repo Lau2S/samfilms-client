@@ -170,9 +170,6 @@ const ResetPasswordPage: React.FC = () => {
 
             {/* Confirmar Contraseña */}
             <div className="form-group">
-              <label htmlFor="confirmPassword" className="form-label">
-                Confirmar Contraseña
-              </label>
               <div className="password-group">
                 <input
                   type={showConfirmPassword ? "text" : "password"}

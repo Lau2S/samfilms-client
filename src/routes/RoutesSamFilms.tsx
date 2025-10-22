@@ -11,6 +11,8 @@ import SiteMapPage from "../pages/sitemap/SiteMapPage";
 import DashboardLayout from "../layout/DashboardLayout";
 import ProtectedRoute from "../components/ProtectedRoute.tsx";
 import ResetPasswordPage from '../pages/reset-password/ResetPasswordPage';
+import CatalogMoviesPage from "../pages/catalog/CatalogMoviesPage";
+import FavoritesPage from "../pages/favorites/FavoritesPage.tsx";
 
 /**
  * Top-level route configuration for the SamFilms app.
@@ -52,6 +54,17 @@ const RoutesSamFilms = () => {
             </ProtectedRoute>
           }
           />
+          <Route path="/catalogo" element={
+            <ProtectedRoute>
+              <CatalogMoviesPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/favoritos" element={
+            <ProtectedRoute>
+              <FavoritesPage />
+            </ProtectedRoute>
+          } />
 
           <Route path="/perfil" element={
             <ProtectedRoute>

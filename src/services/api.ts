@@ -152,10 +152,62 @@ class ApiService {
     }, true);
   }
 
-  // ========== PELÍCULAS ==========
+  // // ========== PELÍCULAS ==========
   
-  async getMovies() {
-    return this.request('/movies', { method: 'GET' });
+  // async getMovies() {
+  //   return this.request('/movies', { method: 'GET' });
+  // }
+
+  // async getMovieById(id: string) {
+  //   return this.request(`/movies/${id}`, { method: 'GET' });
+  // }
+
+  // async searchMovies(nombre: string) {
+  //   return this.request(`/movies/search/${nombre}`, { method: 'GET' });
+  // }
+
+  // async getMoviesByGenre(genero: string) {
+  //   return this.request(`/movies/genero/${genero}`, { method: 'GET' });
+  // }
+
+  // // ========== FAVORITOS ==========
+  
+  // async getFavorites() {
+  //   return this.request('/favorites', { method: 'GET' }, true);
+  // }
+
+  // async addToFavorites(movieId: string) {
+  //   return this.request('/favorites', {
+  //     method: 'POST',
+  //     body: JSON.stringify({ movieId }),
+  //   }, true);
+  // }
+
+  // async removeFromFavorites(movieId: string) {
+  //   return this.request(`/favorites/${movieId}`, {
+  //     method: 'DELETE',
+  //   }, true);
+  // }
+
+  // async checkIfFavorite(movieId: string) {
+  //   return this.request(`/favorites/check/${movieId}`, {
+  //     method: 'GET',
+  //   }, true);
+  // }
+
+  // async getFavoritesStats() {
+  //   return this.request('/favorites/stats', { method: 'GET' }, true);
+  // }
+
+  // async clearAllFavorites() {
+  //   return this.request('/favorites', { method: 'DELETE' }, true);
+  // }
+
+  // ========== PELÍCULAS - TMDB ==========
+  
+  async getMovies(limit?: number) {
+    const params = limit ? `?limit=${limit}` : '';
+    return this.request(`/movies${params}`, { method: 'GET' });
   }
 
   async getMovieById(id: string) {
@@ -163,12 +215,21 @@ class ApiService {
   }
 
   async searchMovies(nombre: string) {
-    return this.request(`/movies/search/${nombre}`, { method: 'GET' });
+    return this.request(`/movies/search/${encodeURIComponent(nombre)}`, { 
+      method: 'GET' 
+    });
   }
 
-  async getMoviesByGenre(genero: string) {
-    return this.request(`/movies/genero/${genero}`, { method: 'GET' });
+  async getMoviesByGenre(genero: string, limit?: number) {
+    const params = limit ? `?limit=${limit}` : '';
+    return this.request(`/movies/genero/${encodeURIComponent(genero)}${params}`, { 
+      method: 'GET' 
+    });
   }
+  // metodo para mostrar trailer en WatchMoviePage
+async getMovieTrailer(id: string) {
+  return this.request(`/movies/${id}/trailer`, { method: 'GET' });
+}
 
   // ========== FAVORITOS ==========
   
@@ -199,7 +260,7 @@ class ApiService {
     return this.request('/favorites/stats', { method: 'GET' }, true);
   }
 
-  async clearAllFavorites() {
+   async clearAllFavorites() {
     return this.request('/favorites', { method: 'DELETE' }, true);
   }
 
@@ -257,58 +318,6 @@ export const getUsers = async () => {
   return res?.data ?? res;
 };
 
-// =========================
-// TMDb SERVICE
-// =========================
-const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-
-export const TMDbService = {
-  async getPopularMovies() {
-    const res = await axios.get(`${TMDB_BASE_URL}/movie/popular`, {
-      params: { api_key: TMDB_API_KEY, language: 'es-ES', page: 1 },
-    });
-    return res.data.results;
-  },
-
-  async getMovieById(id: string) {
-    const res = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
-      params: { api_key: TMDB_API_KEY, language: 'es-ES' },
-    });
-    return res.data;
-  },
-
-  async getMoviesByGenre(genreId: number) {
-    const res = await axios.get(`${TMDB_BASE_URL}/discover/movie`, {
-      params: { api_key: TMDB_API_KEY, with_genres: genreId, language: 'es-ES' },
-    });
-    return res.data.results;
-  },
-
-  async searchMovies(query: string) {
-    const res = await axios.get(`${TMDB_BASE_URL}/search/movie`, {
-      params: { api_key: TMDB_API_KEY, query, language: 'es-ES' },
-    });
-    return res.data.results;
-  },
-
-  // 🧠 Lo que usaremos para el WatchMoviePage
-  async getMovieVideos(id: string) {
-    const res = await axios.get(`${TMDB_BASE_URL}/movie/${id}/videos`, {
-      params: { api_key: TMDB_API_KEY, language: 'es-ES' },
-    });
-    return res.data.results.filter((v: any) => v.site === 'YouTube' && v.type === 'Trailer');
-  },
-  async getMovieDetails(id: string) {
-    const res = await axios.get(`${TMDB_BASE_URL}/movie/${id}`, {
-      params: { 
-        api_key: TMDB_API_KEY,
-        language: 'es-ES',
-      },
-    });
-    return res.data;
-  },
-};
 // =========================
 // YouTube SERVICE
 // =========================
