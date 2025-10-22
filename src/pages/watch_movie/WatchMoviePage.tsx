@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import api from '../../services/api';
+import api, {YouTubeService} from '../../services/api';
+
 import './WatchMoviePage.scss';
 
 interface Movie {
@@ -26,7 +27,7 @@ const WatchMoviePage: React.FC = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
   // User interaction states
   const [userRating, setUserRating] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -35,33 +36,52 @@ const WatchMoviePage: React.FC = () => {
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
 
-  useEffect(() => {
-    if (movieId) {
-      loadMovie();
-      checkFavoriteStatus();
-      loadComments();
-    }
+  // useEffect(() => {
+  //   if (movieId) {
+  //     loadMovie();
+  //     checkFavoriteStatus();
+  //     loadComments();
+  //   }
+  // }, [movieId]);
+
+   useEffect(() => {
+    if (!movieId) return;
+    const fetchMovieData = async () => {
+      setLoading(true);
+      try {
+        // 1️⃣ Obtener datos desde tu backend
+        const response: any = await api.getMovieById(movieId);
+        if (!response.success || !response.data) {
+          throw new Error('No se pudo cargar la película');
+        }
+
+        const movieData = response.data;
+        setMovie(movieData);
+
+        // 2️⃣ Buscar tráiler en YouTube
+        const youtubeData = await YouTubeService.searchTrailer(movieData.nombre);
+        if (youtubeData) {
+          const videoId = youtubeData.id?.videoId;
+          setTrailerUrl(`https://www.youtube.com/embed/${videoId}`);
+        } else {
+          setTrailerUrl(null);
+        }
+
+        // 3️⃣ Verificar favoritos y comentarios
+        await checkFavoriteStatus();
+        await loadComments();
+      } catch (err: any) {
+        console.error('❌ Error cargando película:', err);
+        setError(err.message || 'Error al cargar la película');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMovieData();
   }, [movieId]);
 
-  const loadMovie = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response: any = await api.getMovieById(movieId!);
-      
-      if (response.success && response.data) {
-        setMovie(response.data);
-      } else {
-        setError('No se pudo cargar la película');
-      }
-    } catch (err: any) {
-      console.error('❌ Error cargando película:', err);
-      setError(err.message || 'Error al cargar la película');
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const checkFavoriteStatus = async () => {
     try {
@@ -264,24 +284,33 @@ const WatchMoviePage: React.FC = () => {
         </div>
       </div>
 
+       {/* TRAILER */}
       <div className="movie-player">
-        <video 
-          width="100%" 
-          height="380" 
-          poster={movie.imagen_url || getDefaultBackdrop()} 
-          controls
-        >
-          <source src="#" type="video/mp4" />
-          Tu navegador no soporta la reproducción de video.
-        </video>
-        <div style={{
-          textAlign: 'center',
-          marginTop: '1rem',
-          color: 'rgba(255,255,255,0.6)',
-          fontSize: '0.9rem'
-        }}>
-          ℹ️ Video de demostración. Integra con tu proveedor de streaming.
-        </div>
+        {trailerUrl ? (
+          <iframe
+            width="100%"
+            height="400"
+            src={trailerUrl}
+            title={`Trailer de ${movie.nombre}`}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : (
+          <div
+            style={{
+              width: '100%',
+              height: '400px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: '#222',
+              color: 'rgba(255,255,255,0.7)',
+            }}
+          >
+            🎬 Tráiler no disponible
+          </div>
+        )}
       </div>
 
       <div className="comments-section">

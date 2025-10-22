@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
 interface ApiResponse<T = any> {
@@ -224,6 +226,10 @@ class ApiService {
       method: 'GET' 
     });
   }
+  // metodo para mostrar trailer en WatchMoviePage
+async getMovieTrailer(id: string) {
+  return this.request(`/movies/${id}/trailer`, { method: 'GET' });
+}
 
   // ========== FAVORITOS ==========
   
@@ -311,5 +317,30 @@ export const getUsers = async () => {
   const res = await api.getUsers();
   return res?.data ?? res;
 };
+
+// =========================
+// YouTube SERVICE
+// =========================
+const YT_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+const YT_BASE_URL = 'https://www.googleapis.com/youtube/v3';
+
+export const YouTubeService = {
+  async searchTrailer(title: string) {
+    const res = await axios.get(`${YT_BASE_URL}/search`, {
+      params: {
+        key: YT_API_KEY,
+        q: `${title} trailer oficial`,
+        part: 'snippet',
+        type: 'video',
+        maxResults: 1,
+      },
+    });
+    if (res.data.items.length > 0) {
+      return res.data.items[0];
+    }
+    return null;
+  },
+};
+
 
 export default api;
