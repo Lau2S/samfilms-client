@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
 
 interface ApiResponse<T = any> {
@@ -51,7 +53,8 @@ class ApiService {
       if (!response.ok) {
         // Si el servidor devolvió JSON con mensajes, úsalos; si no, lanza genérico
         const message = (data && (data.message || data.message_es)) || 'Error en la petición';
-        throw new Error(message);
+        // Añadimos endpoint y status al error para facilitar el debugging desde el front
+        throw new Error(`${message} (endpoint: ${endpoint}, status: ${response.status})`);
       }
 
       return data;
@@ -150,10 +153,62 @@ class ApiService {
     }, true);
   }
 
-  // ========== PELÍCULAS ==========
+  // // ========== PELÍCULAS ==========
   
-  async getMovies() {
-    return this.request('/movies', { method: 'GET' });
+  // async getMovies() {
+  //   return this.request('/movies', { method: 'GET' });
+  // }
+
+  // async getMovieById(id: string) {
+  //   return this.request(`/movies/${id}`, { method: 'GET' });
+  // }
+
+  // async searchMovies(nombre: string) {
+  //   return this.request(`/movies/search/${nombre}`, { method: 'GET' });
+  // }
+
+  // async getMoviesByGenre(genero: string) {
+  //   return this.request(`/movies/genero/${genero}`, { method: 'GET' });
+  // }
+
+  // // ========== FAVORITOS ==========
+  
+  // async getFavorites() {
+  //   return this.request('/favorites', { method: 'GET' }, true);
+  // }
+
+  // async addToFavorites(movieId: string) {
+  //   return this.request('/favorites', {
+  //     method: 'POST',
+  //     body: JSON.stringify({ movieId }),
+  //   }, true);
+  // }
+
+  // async removeFromFavorites(movieId: string) {
+  //   return this.request(`/favorites/${movieId}`, {
+  //     method: 'DELETE',
+  //   }, true);
+  // }
+
+  // async checkIfFavorite(movieId: string) {
+  //   return this.request(`/favorites/check/${movieId}`, {
+  //     method: 'GET',
+  //   }, true);
+  // }
+
+  // async getFavoritesStats() {
+  //   return this.request('/favorites/stats', { method: 'GET' }, true);
+  // }
+
+  // async clearAllFavorites() {
+  //   return this.request('/favorites', { method: 'DELETE' }, true);
+  // }
+
+  // ========== PELÍCULAS - TMDB ==========
+  
+  async getMovies(limit?: number) {
+    const params = limit ? `?limit=${limit}` : '';
+    return this.request(`/movies${params}`, { method: 'GET' });
   }
 
   async getMovieById(id: string) {
@@ -161,12 +216,21 @@ class ApiService {
   }
 
   async searchMovies(nombre: string) {
-    return this.request(`/movies/search/${nombre}`, { method: 'GET' });
+    return this.request(`/movies/search/${encodeURIComponent(nombre)}`, { 
+      method: 'GET' 
+    });
   }
 
-  async getMoviesByGenre(genero: string) {
-    return this.request(`/movies/genero/${genero}`, { method: 'GET' });
+  async getMoviesByGenre(genero: string, limit?: number) {
+    const params = limit ? `?limit=${limit}` : '';
+    return this.request(`/movies/genero/${encodeURIComponent(genero)}${params}`, { 
+      method: 'GET' 
+    });
   }
+  // metodo para mostrar trailer en WatchMoviePage
+async getMovieTrailer(id: string) {
+  return this.request(`/movies/${id}/trailer`, { method: 'GET' });
+}
 
   // ========== FAVORITOS ==========
   
@@ -197,7 +261,7 @@ class ApiService {
     return this.request('/favorites/stats', { method: 'GET' }, true);
   }
 
-  async clearAllFavorites() {
+   async clearAllFavorites() {
     return this.request('/favorites', { method: 'DELETE' }, true);
   }
 
@@ -254,5 +318,30 @@ export const getUsers = async () => {
   const res = await api.getUsers();
   return res?.data ?? res;
 };
+
+// =========================
+// YouTube SERVICE
+// =========================
+const YT_API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+const YT_BASE_URL = 'https://www.googleapis.com/youtube/v3';
+
+export const YouTubeService = {
+  async searchTrailer(title: string) {
+    const res = await axios.get(`${YT_BASE_URL}/search`, {
+      params: {
+        key: YT_API_KEY,
+        q: `${title} trailer oficial`,
+        part: 'snippet',
+        type: 'video',
+        maxResults: 1,
+      },
+    });
+    if (res.data.items.length > 0) {
+      return res.data.items[0];
+    }
+    return null;
+  },
+};
+
 
 export default api;
