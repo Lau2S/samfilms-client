@@ -19,6 +19,13 @@ interface Comment {
   contenido: string;
   usuario_id: string;
   created_at: string;
+  updated_at?: string;
+  editado?: boolean;
+  users?: {
+    id?: string;
+    nombres?: string;
+    apellidos?: string;
+  };
 }
 
 const WatchMoviePage: React.FC = () => {
@@ -33,6 +40,8 @@ const WatchMoviePage: React.FC = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState<string>('');
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
 
@@ -100,12 +109,60 @@ const WatchMoviePage: React.FC = () => {
       const response: any = await api.getCommentsByMovie(movieId!);
       
       if (response.success && response.data) {
+        // expect response.data to be array of comments possibly with embedded users
         setComments(response.data);
       }
     } catch (err) {
       console.log('No se pudieron cargar comentarios');
     } finally {
       setLoadingComments(false);
+    }
+  };
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!currentUser?.id) {
+      alert('Debes iniciar sesión para eliminar tu comentario');
+      return;
+    }
+    if (!window.confirm('¿Seguro que quieres eliminar este comentario?')) return;
+
+    try {
+      const res: any = await api.deleteComment(commentId, currentUser.id);
+      if (res.success) {
+        setComments(prev => prev.filter(c => c.id !== commentId));
+      }
+    } catch (err: any) {
+      console.error('Error deleting comment', err);
+      alert(err.message || 'Error al eliminar comentario');
+    }
+  };
+
+  const startEditing = (c: Comment) => {
+    setEditingId(c.id);
+    setEditText(c.contenido);
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditText('');
+  };
+
+  const submitEdit = async (c: Comment) => {
+    if (!currentUser?.id) {
+      alert('Debes iniciar sesión para editar tu comentario');
+      return;
+    }
+    try {
+      const res: any = await api.updateComment(c.id, editText.trim(), currentUser.id);
+      if (res.success && res.data) {
+        setComments(prev => prev.map(p => p.id === c.id ? { ...p, ...res.data } : p));
+        cancelEditing();
+      }
+    } catch (err: any) {
+      console.error('Error updating comment', err);
+      alert(err.message || 'Error al actualizar comentario');
     }
   };
 
@@ -153,9 +210,22 @@ const WatchMoviePage: React.FC = () => {
         return;
       }
 
+      // Resolve the internal movie id expected by the backend.
+      // Some backends expect an internal UUID for pelicula_id while the route uses TMDB id.
+      let peliculaIdToSend: string = String(movieId);
+      try {
+        const movieResp: any = await api.getMovieById(movieId!);
+        if (movieResp && movieResp.success && movieResp.data) {
+          // prefer backend/internal id when available
+          peliculaIdToSend = String(movieResp.data.id ?? movieResp.data._id ?? peliculaIdToSend);
+        }
+      } catch (err) {
+        console.warn('Could not resolve internal movie id, falling back to route id', err);
+      }
+
       const response = await api.createComment({
         usuario_id: user.id,
-        pelicula_id: movieId!,
+        pelicula_id: peliculaIdToSend,
         contenido: comment.trim()
       });
 
@@ -179,9 +249,6 @@ const WatchMoviePage: React.FC = () => {
     return 'https://via.placeholder.com/300x450/8b5cf6/ffffff?text=Sin+Imagen';
   };
 
-  const getDefaultBackdrop = () => {
-    return 'https://via.placeholder.com/1280x720/8b5cf6/ffffff?text=Sin+Video';
-  };
 
   if (loading) {
     return (
@@ -336,10 +403,32 @@ const WatchMoviePage: React.FC = () => {
           <ul className="comments-list">
             {comments.map((c) => (
               <li key={c.id} className="comment-item">
-                <div style={{ fontSize: '0.85em', color: '#aaa', marginBottom: '0.25rem' }}>
-                  {new Date(c.created_at).toLocaleDateString()}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: '0.85em', color: '#aaa', marginBottom: '0.25rem' }}>
+                    <strong style={{ color: '#fff' }}>{c.users ? `${c.users.nombres || ''} ${c.users.apellidos || ''}`.trim() : ''}</strong>
+                    <div style={{ fontSize: '0.75em', color: '#aaa' }}>{new Date(c.created_at).toLocaleString()}</div>
+                    {c.editado && <span style={{ fontSize: '0.75em', color: '#bbb', marginLeft: 8 }}> (editado)</span>}
+                  </div>
+                  {/* show edit/delete only for author's comments */}
+                  {currentUser?.id && (c.usuario_id === currentUser.id || c.users?.id === currentUser.id) && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => startEditing(c)} className="btn-small">Editar</button>
+                      <button onClick={() => handleDeleteComment(c.id)} className="btn-small danger">Eliminar</button>
+                    </div>
+                  )}
                 </div>
-                {c.contenido}
+
+                {editingId === c.id ? (
+                  <div>
+                    <textarea value={editText} onChange={e => setEditText(e.target.value)} rows={3}></textarea>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                      <button onClick={() => submitEdit(c)} className="btn-small">Guardar</button>
+                      <button onClick={cancelEditing} className="btn-small">Cancelar</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 6 }}>{c.contenido}</div>
+                )}
               </li>
             ))}
           </ul>
