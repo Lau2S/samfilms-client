@@ -304,6 +304,39 @@ async getMovieTrailer(id: string) {
     }, true);
   }
 
+  // ========== RATINGS ==========
+
+  // Obtener promedio por tmdb id (público)
+  async getRatingAverageByTmdb(tmdbId: number) {
+    return this.request(`/ratings/average?tmdb_id=${tmdbId}`, { method: 'GET' });
+  }
+
+  // Obtener promedio por pelicula id (público)
+  async getRatingAverageByPelicula(peliculaId: string) {
+    return this.request(`/ratings/pelicula/${peliculaId}/average`, { method: 'GET' });
+  }
+
+  // Obtener calificación del usuario actual para una película (requiere auth)
+  // Se puede pasar tmdb_id o pelicula_id como query
+  async getUserRating(opts: { tmdb_id?: number; pelicula_id?: string }) {
+    const params: string[] = [];
+    if (opts.tmdb_id) params.push(`tmdb_id=${opts.tmdb_id}`);
+    if (opts.pelicula_id) params.push(`pelicula_id=${encodeURIComponent(opts.pelicula_id)}`);
+    const qs = params.length ? `?${params.join('&')}` : '';
+    return this.request(`/ratings/user${qs}`, { method: 'GET' }, true);
+  }
+
+  // Guardar / actualizar calificación (requiere auth)
+  async submitRating(data: { pelicula_id?: string | null; tmdb_id?: number | null; rating: number }) {
+    const body: any = { rating: data.rating };
+    if (data.pelicula_id) body.pelicula_id = data.pelicula_id;
+    if (data.tmdb_id) body.tmdb_id = data.tmdb_id;
+    return this.request('/ratings', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }, true);
+  }
+
   // ========== USUARIOS (ADMIN / listado público si aplica) ==========
 
   async getUsers() {

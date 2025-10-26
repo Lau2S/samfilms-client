@@ -172,7 +172,20 @@ const LoginPage: React.FC = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
               >
-                {/* Iconos comentados */}
+                {showPassword ? (
+                // OJO ABIERTO
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3.2" />
+                  <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z"/>
+                </svg>
+              ) : (
+                // OJO CERRADO / TACHADO
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3.2" />
+                  <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z"/>
+                  <line x1="3" y1="3" x2="21" y2="21" stroke="#8b5cf6" strokeWidth="2"/>
+                </svg>
+              )}
               </button>
             </div>
 
