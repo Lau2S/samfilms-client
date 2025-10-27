@@ -85,7 +85,11 @@ const RegisterPage: React.FC = () => {
       <div className="register-container">
         <div className="register-card">
           {/* Botón de regresar */}
-          <button className="back-button" onClick={handleBack} aria-label="Regresar">
+          <button
+            className="back-button"
+            onClick={handleBack}
+            aria-label="Regresar"
+          >
             <svg
               width="24"
               height="24"
@@ -159,42 +163,86 @@ const RegisterPage: React.FC = () => {
 
             {/* Campo de Contraseña */}
             <div className="form-group password-group">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Ingresa tu Contraseña"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                minLength={6}
-                className="form-input"
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword((s) => !s)}
-                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-              >
-                {/* Iconos comentados */}
-              </button>
-              
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="Ingresa tu Contraseña"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  minLength={6}
+                  className="form-input"
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                >
+                  {showPassword ? (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3.2" />
+                      <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3.2" />
+                      <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z" />
+                      <line
+                        x1="3"
+                        y1="3"
+                        x2="21"
+                        y2="21"
+                        stroke="#8b5cf6"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
+
               {formData.password && (
                 <div className="password-requirements">
                   <p>La contraseña debe contener:</p>
                   <ul>
-                    <li className={passwordValidation.minLength ? 'valid' : ''}>
+                    <li className={passwordValidation.minLength ? "valid" : ""}>
                       Al menos 8 caracteres
                     </li>
-                    <li className={passwordValidation.hasUpperCase ? 'valid' : ''}>
+                    <li
+                      className={passwordValidation.hasUpperCase ? "valid" : ""}
+                    >
                       Una letra mayúscula
                     </li>
-                    <li className={passwordValidation.hasLowerCase ? 'valid' : ''}>
+                    <li
+                      className={passwordValidation.hasLowerCase ? "valid" : ""}
+                    >
                       Una letra minúscula
                     </li>
-                    <li className={passwordValidation.hasNumber ? 'valid' : ''}>
+                    <li className={passwordValidation.hasNumber ? "valid" : ""}>
                       Un número
                     </li>
-                    <li className={passwordValidation.hasSpecialChar ? 'valid' : ''}>
+                    <li
+                      className={
+                        passwordValidation.hasSpecialChar ? "valid" : ""
+                      }
+                    >
                       Un carácter especial (!@#$%^&*...)
                     </li>
                   </ul>
@@ -204,28 +252,68 @@ const RegisterPage: React.FC = () => {
 
             {/* Campo de Confirmar Contraseña */}
             <div className="form-group password-group">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                placeholder="Confirma tu Contraseña"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                minLength={6}
-                className="form-input"
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowConfirmPassword((s) => !s)}
-                aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-              >
-                {/* Iconos comentados */}
-              </button>
+              <div className="password-input-wrapper">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
+                  placeholder="Confirma tu Contraseña"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  minLength={6}
+                  className="form-input"
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowConfirmPassword((s) => !s)}
+                  aria-label={
+                    showConfirmPassword
+                      ? "Ocultar contraseña"
+                      : "Mostrar contraseña"
+                  }
+                >
+                  {showConfirmPassword ? (
+                    // OJO ABIERTO
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3.2" />
+                      <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z" />
+                    </svg>
+                  ) : (
+                    // OJO CERRADO / TACHADO
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3.2" />
+                      <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z" />
+                      <line
+                        x1="3"
+                        y1="3"
+                        x2="21"
+                        y2="21"
+                        stroke="#8b5cf6"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Botón de Submit */}
-            <button type="submit" className="submit-button" >
+            <button type="submit" className="submit-button">
               Crear Cuenta
             </button>
           </form>
