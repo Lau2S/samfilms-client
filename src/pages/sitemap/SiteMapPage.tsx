@@ -56,7 +56,9 @@ const SiteMapPage: React.FC = () => {
             <div className="section-icon">🎬</div>
             <h2>Películas</h2>
             <ul>
-              <li>Explorar Catálogo</li>
+              <li>
+                <Link to="/catalogo">Explorar Catálogo</Link>
+              </li>
               <li>Buscar Películas</li>
               <li>Filtrar por Género</li>
               <li>Ver Detalles de Película</li>
@@ -69,7 +71,9 @@ const SiteMapPage: React.FC = () => {
             <div className="section-icon">👤</div>
             <h2>Mi Perfil</h2>
             <ul>
-              <li>Ver Perfil</li>
+              <li>
+                <Link to="/perfil">Ver Perfil</Link>
+              </li>
               <li>Editar Información Personal</li>
               <li>Cambiar Contraseña</li>
               <li>Actualizar Foto de Perfil</li>
@@ -82,7 +86,9 @@ const SiteMapPage: React.FC = () => {
             <div className="section-icon">❤️</div>
             <h2>Mis Favoritos</h2>
             <ul>
-              <li>Ver Lista de Favoritos</li>
+              <li>
+                <Link to="/favoritos">Ver Lista de Favoritos</Link>
+              </li>
               <li>Agregar a Favoritos</li>
               <li>Eliminar de Favoritos</li>
               <li>Organizar Favoritos</li>
