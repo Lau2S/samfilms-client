@@ -143,75 +143,89 @@ $color-input-text: #333333;
       }
       
       // Toggle password visibility
-      .password-group {
-        .form-input {
-          padding-right: 3rem;
-        }
-        
-        .toggle-password {
-          position: absolute;
-          right: 1rem;
-          top: 50%;
-          transform: translateY(-50%);
-          background: transparent;
-          border: none;
-          color: rgba(51, 51, 51, 0.6);
-          cursor: pointer;
-          padding: 0.25rem;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: color 0.3s ease;
-          
-          &:hover {
-            color: rgba(51, 51, 51, 0.9);
-          }
-          
-          svg {
-            stroke-width: 2;
-          }
-        }
-      }
-
-      .password-requirements {
-        font-size: 0.8125rem;
-        color: $color-text-muted;
-        margin-top: 0.5rem;
-        line-height: 1.6;
-
-        p {
-          margin-bottom: 0.25rem;
-          font-weight: 500;
-        }
-
-        ul {
-          list-style: none;
-          padding-left: 0;
-          margin: 0.5rem 0 0 0;
-
-          li {
-            padding-left: 1.5rem;
-            position: relative;
-            margin-bottom: 0.25rem;
-
-            &::before {
-              content: '•';
-              position: absolute;
-              left: 0.5rem;
-              color: $color-primary;
-            }
-
-            &.valid {
-              color: #4caf50;
-
-              &::before {
-                content: '✓';
-                color: #4caf50;
+            .password-group {
+              width: 100%;
+      
+              .password-input-wrapper {
+                position: relative;
+                width: 100%;
+      
+                .form-input {
+                  width: 100%;
+                  padding-right: 3rem;
+                  box-sizing: border-box;
+                }
+      
+                .toggle-password {
+                  position: absolute;
+                  right: 1rem;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  background: transparent;
+                  border: none;
+                  color: rgba(51, 51, 51, 0.6);
+                  cursor: pointer;
+                  padding: 0.25rem;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  transition: color 0.3s ease;
+                  z-index: 10;
+      
+                  &:hover {
+                    color: rgba(51, 51, 51, 0.9);
+                  }
+      
+                  svg {
+                    width: 22px;
+                    height: 22px;
+                    stroke-width: 2;
+                    display: block;
+                    pointer-events: none;
+                  }
+                }
+              }
+      
+              .password-requirements {
+                font-size: 0.8125rem;
+                color: $color-text-muted;
+                margin-top: 0.5rem;
+                line-height: 1.6;
+      
+                p {
+                  margin-bottom: 0.25rem;
+                  font-weight: 500;
+                }
+      
+                ul {
+                  list-style: none;
+                  padding-left: 0;
+                  margin: 0.5rem 0 0 0;
+      
+                  li {
+                    padding-left: 1.5rem;
+                    position: relative;
+                    margin-bottom: 0.25rem;
+      
+                    &::before {
+                      content: '•';
+                      position: absolute;
+                      left: 0.5rem;
+                      color: $color-primary;
+                    }
+      
+                    &.valid {
+                      color: #4caf50;
+      
+                      &::before {
+                        content: '✓';
+                        color: #4caf50;
+                      }
+                    }
+                  }
+                }
               }
             }
-          }
-        }
-      }
       
       // Botón de submit
       .submit-button {

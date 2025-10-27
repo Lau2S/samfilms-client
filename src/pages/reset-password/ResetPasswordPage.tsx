@@ -10,7 +10,7 @@ const ResetPasswordPage: React.FC = () => {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -131,8 +131,8 @@ const ResetPasswordPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="reset-form">
             {/* Nueva Contraseña */}
-            <div className="form-group">
-              <div className="password-group">
+            <div className="form-group password-group">
+              <div className="password-input-wrapper">
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
@@ -142,6 +142,48 @@ const ResetPasswordPage: React.FC = () => {
                   required
                   className={`form-input ${error && password !== confirmPassword ? 'error' : ''}`}
                 />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                >
+                  {showPassword ? (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3.2" />
+                      <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3.2" />
+                      <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z" />
+                      <line
+                        x1="3"
+                        y1="3"
+                        x2="21"
+                        y2="21"
+                        stroke="#8b5cf6"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  )}
+                </button>
               </div>
               
               {password && (
@@ -169,8 +211,8 @@ const ResetPasswordPage: React.FC = () => {
             </div>
 
             {/* Confirmar Contraseña */}
-            <div className="form-group">
-              <div className="password-group">
+            <div className="form-group password-group">
+              <div className="password-input-wrapper">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   id="confirmPassword"
@@ -180,6 +222,48 @@ const ResetPasswordPage: React.FC = () => {
                   required
                   className={`form-input ${error && password !== confirmPassword ? 'error' : ''}`}
                 />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={
+                    showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
+                  }
+                >
+                  {showPassword ? (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3.2" />
+                      <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z" />
+                    </svg>
+                  ) : (
+                    <svg
+                      width="22"
+                      height="22"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#8b5cf6"
+                      strokeWidth="2"
+                    >
+                      <circle cx="12" cy="12" r="3.2" />
+                      <path d="M2 12C3.5 7.3 7.5 4 12 4s8.5 3.3 10 8-3.5 8-10 8-8.5-3.3-10-8z" />
+                      <line
+                        x1="3"
+                        y1="3"
+                        x2="21"
+                        y2="21"
+                        stroke="#8b5cf6"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                  )}
+                </button>
               </div>
             </div>
 
