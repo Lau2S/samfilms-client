@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParams, useNavigate } from 'react-router';
 import api, {YouTubeService} from '../../services/api';
+import { toast } from 'react-toastify';
 
 import './WatchMoviePage.scss';
 
@@ -106,6 +107,7 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
       const response: any = await api.checkIfFavorite(movieId!);
       if (response.success) {
         setIsFavorite(response.data?.isFavorite || false);
+        
       }
     } catch (err) {
       console.log('No se pudo verificar favorito (puede que no esté autenticado)');
@@ -188,7 +190,8 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
 
   const handleDeleteComment = async (commentId: string) => {
     if (!currentUser?.id) {
-      alert('Debes iniciar sesión para eliminar tu comentario');
+      //alert('Debes iniciar sesión para eliminar tu comentario');
+      toast.error('Debes iniciar sesión para eliminar tu comentario')
       return;
     }
     if (!window.confirm('¿Seguro que quieres eliminar este comentario?')) return;
@@ -216,7 +219,8 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
 
   const submitEdit = async (c: Comment) => {
     if (!currentUser?.id) {
-      alert('Debes iniciar sesión para editar tu comentario');
+      //alert('Debes iniciar sesión para editar tu comentario');
+      toast.error('Debes iniciar sesión para editar tu comentario')
       return;
     }
     try {
@@ -301,17 +305,19 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
   const handleFavorite = async () => {
     try {
       setLoadingFavorite(true);
-
+      
       if (isFavorite) {
         const response = await api.removeFromFavorites(movieId!);
         if (response.success) {
           setIsFavorite(false);
+          toast.success('Película eliminada de favoritos correctamente'); //toast
           console.log('✅ Eliminado de favoritos');
         }
       } else {
         const response = await api.addToFavorites(movieId!);
         if (response.success) {
           setIsFavorite(true);
+          toast.success('Película añadida correctamente'); //toast
           console.log('✅ Agregado a favoritos');
         }
       }
@@ -332,7 +338,8 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       
       if (!user.id) {
-        alert('Debes iniciar sesión para comentar');
+        //alert('Debes iniciar sesión para comentar');
+        toast.error('Debes iniciar sesión para comentar')
         return;
       }
 
