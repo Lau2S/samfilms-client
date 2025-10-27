@@ -2,6 +2,7 @@ import React from "react";
 import DashboardNavbar from "../components/navbar/DashboardNavbar";
 import "./DashboardLayout.scss";
 import { Outlet } from "react-router";
+import Footer from "../components/footer/Footer";
 
 /**
  * Layout for authenticated users (dashboard).
@@ -17,6 +18,7 @@ const DashboardLayout: React.FC = () => {
       <main className="dashboard-main">
         <Outlet />
       </main>
+      <Footer/>
     </>
   );
 };
