@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import api from '../../services/api';
 import './FavoritesPage.scss';
+import { toast } from 'react-toastify';
 
 interface FavoriteMovie {
   id: string;
@@ -27,6 +28,11 @@ const FavoritesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
+  //modal states
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
+
   useEffect(() => {
     loadFavorites();
   }, []);
@@ -37,7 +43,7 @@ const FavoritesPage: React.FC = () => {
       setError(null);
 
       const response: any = await api.getFavorites();
-      
+
       if (response.success && response.data) {
         // Si el backend no incluye el objeto `movie` en cada favorito,
         // consultamos los detalles de la película y enriquecemos el array
@@ -81,29 +87,25 @@ const FavoritesPage: React.FC = () => {
   };
 
   const handleRemoveFavorite = async (movieId: string) => {
-    if (!window.confirm('¿Estás seguro de querer eliminar esta película de tus favoritos?')) {
-      return;
-    }
-
     try {
-      // movieId puede venir como pelicula_id o tmdb_id
       setRemovingId(String(movieId));
-
       const response = await api.removeFromFavorites(String(movieId));
-
       if (response.success) {
-        // Filtrar por los posibles campos que mapean al id de la película
         const idToRemove = String(movieId);
-        setFavorites(favorites.filter(fav => String(fav.pelicula_id ?? fav.movie_id ?? fav.tmdb_id ?? fav.movie?.id ?? fav.id) !== idToRemove));
-        console.log('✅ Eliminado de favoritos');
+        setFavorites(favorites.filter(fav =>
+          String(fav.pelicula_id ?? fav.movie_id ?? fav.tmdb_id ?? fav.movie?.id ?? fav.id) !== idToRemove
+        ));
+        toast.success('Pelicula eliminada de favoritos exitosamente')
       }
     } catch (err: any) {
-      console.error('❌ Error eliminando favorito:', err);
-      alert(err.message || 'Error al eliminar de favoritos');
+      // ...error handling...
     } finally {
       setRemovingId(null);
+      setConfirmOpen(false);
+      setConfirmId(null);
     }
   };
+
 
   const handleMovieClick = (movieId: string) => {
     navigate(`/peliculas/${movieId}`);
@@ -136,7 +138,7 @@ const FavoritesPage: React.FC = () => {
 
   return (
     <div className="favorites-page">
-      
+
       <div className="favorites-header">
         <h1 className="favorites-title">Mis Favoritos</h1>
         {/* Mostrar sólo los favoritos que tengan la info de película cargada */}
@@ -166,7 +168,7 @@ const FavoritesPage: React.FC = () => {
 
             return (
               <div key={favorite.id} className="favorite-card">
-                <div 
+                <div
                   className="favorite-poster-container"
                   onClick={() => handleMovieClick(movieIdFromFavorite(favorite))}
                 >
@@ -193,8 +195,12 @@ const FavoritesPage: React.FC = () => {
 
                 <button
                   className="remove-btn"
-                  onClick={() => handleRemoveFavorite(movieIdFromFavorite(favorite))}
-                  disabled={removingId === movieIdFromFavorite(favorite)}
+                  // onClick={() => handleRemoveFavorite(movieIdFromFavorite(favorite))}
+                  // disabled={removingId === movieIdFromFavorite(favorite)}
+                  onClick={() => {
+                    setConfirmOpen(true);
+                    setConfirmId(movieIdFromFavorite(favorite));
+                  }}
                 >
                   {removingId === favorite.pelicula_id ? (
                     <span className="spinner-small"></span>
@@ -218,7 +224,45 @@ const FavoritesPage: React.FC = () => {
           </button>
         </div>
       )}
+
+      {confirmOpen && (
+        <div className="modal-overlay" onClick={e => {
+          if (e.target === e.currentTarget) {
+            setConfirmOpen(false);
+            setConfirmId(null);
+          }
+        }}>
+          <div className="modal-card confirm-modal">
+            <button
+              className="modal-close"
+              onClick={() => { setConfirmOpen(false); setConfirmId(null); }}
+              aria-label="Cerrar modal"
+            >×</button>
+            <h3>Eliminar de favoritos</h3>
+            <p>¿Estás seguro de eliminar esta película de tus favoritos? Esta acción no se puede deshacer.</p>
+            <div className="modal-actions">
+              <button
+                className="confirm-delete"
+                onClick={() => {
+                  if (confirmId) handleRemoveFavorite(confirmId);
+                }}
+              >
+                Eliminar
+              </button>
+              <button
+                className="cancel-delete"
+                onClick={() => { setConfirmOpen(false); setConfirmId(null); }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
+
+
   );
 };
 

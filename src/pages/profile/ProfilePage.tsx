@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './ProfilePage.scss';
 import { useNavigate } from 'react-router';
 import api from '../../services/api';
+import {toast} from 'react-toastify'
 
 interface UserData {
     id: string;
@@ -111,19 +112,22 @@ const ProfilePage: React.FC = () => {
     const handleSave = async () => {
         // Validations
         if (newPassword && newPassword !== confirmPassword) {
-            alert('❌ Las contraseñas no coinciden');
+            //alert('❌ Las contraseñas no coinciden');
+            toast.error('Las contraseñas no coinciden'); //toast
             return;
         }
 
         if (newPassword && newPassword.length < 8) {
-            alert('❌ La contraseña debe tener al menos 8 caracteres');
+            //alert('❌ La contraseña debe tener al menos 8 caracteres');
+            toast.error('La contraseña debe tener al menos 8 caracteres'); //toast
             return;
         }
 
         // Validate and normalize age
         const ageNum = age === '' ? undefined : Number(age);
         if (age !== '' && (isNaN(ageNum as number) || (ageNum as number) < 18 || (ageNum as number) > 120)) {
-            alert('❌ Ingresa una edad válida entre 18 y 120');
+            //alert('❌ Ingresa una edad válida entre 18 y 120');
+            toast.error('Ingresa una edad válida entre 18 y 120'); //toast
             return;
         }
 
@@ -165,7 +169,8 @@ const ProfilePage: React.FC = () => {
                     localStorage.setItem('user', JSON.stringify(serverUser));
                 }
 
-                alert('✅ Perfil actualizado exitosamente');
+                //alert('✅ Perfil actualizado exitosamente');
+                toast.success('Perfil actualizado correctamente'); //toast
                 setEditOpen(false);
 
                 // Clear password fields
@@ -197,7 +202,8 @@ const ProfilePage: React.FC = () => {
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 
-                alert('✅ Cuenta eliminada exitosamente');
+                //alert('✅ Cuenta eliminada exitosamente');
+                toast.success('Cuenta eliminada exitosamente');
                 navigate('/');
             }
         } catch (error: any) {

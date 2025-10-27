@@ -14,6 +14,9 @@ import ResetPasswordPage from '../pages/reset-password/ResetPasswordPage';
 import CatalogMoviesPage from "../pages/catalog/CatalogMoviesPage";
 import FavoritesPage from "../pages/favorites/FavoritesPage.tsx";
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 /**
  * Top-level route configuration for the SamFilms app.
  *
@@ -73,6 +76,7 @@ const RoutesSamFilms = () => {
           } />
         </Route>
       </Routes>
+      <ToastContainer position="bottom-right"/>
     </BrowserRouter>
   );
 };
