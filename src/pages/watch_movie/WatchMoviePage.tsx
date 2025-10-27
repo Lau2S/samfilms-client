@@ -58,14 +58,14 @@ const WatchMoviePage: React.FC = () => {
         const movieData = response.data;
         setMovie(movieData);
 
-        // 2️⃣ Buscar tráiler en YouTube
-        const youtubeData = await YouTubeService.searchTrailer(movieData.nombre);
-        if (youtubeData) {
-          const videoId = youtubeData.id?.videoId;
-          setTrailerUrl(`https://www.youtube.com/embed/${videoId}`);
-        } else {
-          setTrailerUrl(null);
-        }
+         const trailerRes = await api.getMovieTrailer(movieData.id);
+if (trailerRes.success && typeof trailerRes.data === 'string') {
+  setTrailerUrl(trailerRes.data);
+} else {
+  console.warn('⚠️ No se encontró tráiler en Pexels');
+  setTrailerUrl(null);
+}
+
 
         // 3️⃣ Verificar favoritos y comentarios
         await checkFavoriteStatus();
@@ -287,15 +287,16 @@ const WatchMoviePage: React.FC = () => {
        {/* TRAILER */}
       <div className="movie-player">
         {trailerUrl ? (
-          <iframe
-            width="100%"
-            height="400"
-            src={trailerUrl}
-            title={`Trailer de ${movie.nombre}`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
+          <video
+  controls
+  autoPlay
+  loop
+  className="w-full h-full object-cover rounded-xl shadow-lg"
+>
+  <source src={trailerUrl} type="video/mp4" />
+  Tu navegador no soporta video HTML5.
+</video>
+
         ) : (
           <div
             style={{
