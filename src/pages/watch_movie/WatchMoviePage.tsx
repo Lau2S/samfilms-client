@@ -476,35 +476,25 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
         </div>
       </div>
 
-       {/* TRAILER */}
-      <div className="movie-player">
-        {trailerUrl ? (
-          <video
-  controls
-  autoPlay
-  loop
-  className="w-full h-full object-cover rounded-xl shadow-lg"
->
-  <source src={trailerUrl} type="video/mp4" />
-  Tu navegador no soporta video HTML5.
-</video>
+       {/* 🎬 TRAILER */}
+<div className="movie-player">
+  {trailerUrl ? (
+    <video
+      controls
+      autoPlay
+      loop
+      muted
+      playsInline
+      className="movie-frame"
+    >
+      <source src={trailerUrl} type="video/mp4" />
+      Tu navegador no soporta video HTML5.
+    </video>
+  ) : (
+    <div className="fallback">🎬 Tráiler no disponible</div>
+  )}
+</div>
 
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '400px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#222',
-              color: 'rgba(255,255,255,0.7)',
-            }}
-          >
-            🎬 Tráiler no disponible
-          </div>
-        )}
-      </div>
 
       <div className="comments-section">
         <h2>Comentarios</h2>
