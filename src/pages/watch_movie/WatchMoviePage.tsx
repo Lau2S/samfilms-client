@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import { useParams, useNavigate } from 'react-router';
 import api, {YouTubeService} from '../../services/api';
 
@@ -19,20 +20,35 @@ interface Comment {
   contenido: string;
   usuario_id: string;
   created_at: string;
+  updated_at?: string;
+  editado?: boolean;
+  users?: {
+    id?: string;
+    nombres?: string;
+    apellidos?: string;
+  };
 }
 
 const WatchMoviePage: React.FC = () => {
   const { movieId } = useParams<{ movieId: string }>();
   const navigate = useNavigate();
   const [movie, setMovie] = useState<Movie | null>(null);
+  const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
+  // Ratings state
+  const [avgRating, setAvgRating] = useState<number>(0);
+  const [ratingsCount, setRatingsCount] = useState<number>(0);
+  const [userRating, setUserRating] = useState<number | null>(null);
+  const [savingRating, setSavingRating] = useState<boolean>(false);
+  const [ratingMessage, setRatingMessage] = useState<string | null>(null);
   // User interaction states
-  const [userRating, setUserRating] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [comment, setComment] = useState('');
   const [comments, setComments] = useState<Comment[]>([]);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState<string>('');
   const [loadingFavorite, setLoadingFavorite] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
 
@@ -67,9 +83,11 @@ const WatchMoviePage: React.FC = () => {
           setTrailerUrl(null);
         }
 
-        // 3️⃣ Verificar favoritos y comentarios
+        // 3️⃣ Verificar favoritos, comentarios y calificaciones
         await checkFavoriteStatus();
         await loadComments();
+        // cargar ratings
+        await loadRatings(movieData);
       } catch (err: any) {
         console.error('❌ Error cargando película:', err);
         setError(err.message || 'Error al cargar la película');
@@ -94,12 +112,68 @@ const WatchMoviePage: React.FC = () => {
     }
   };
 
+  // Determine identifiers to use for rating requests
+  const isUuid = (s: any) => {
+    if (!s || typeof s !== 'string') return false;
+    // Simple UUID v4-ish pattern (hyphenated)
+    return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(s);
+  };
+
+  const resolveIdentifiers = async (movieData: any) => {
+    // Prefer explicit pelicula_id only if it looks like a UUID; otherwise prefer tmdb id
+    let peliculaId: string | null = null;
+    if (movieData) {
+      const cand = movieData.pelicula_id ?? movieData.movie_id ?? movieData.peliculaId ?? movieData.id ?? null;
+      if (isUuid(cand)) peliculaId = String(cand);
+    }
+    const tmdbId = Number(movieId);
+    return { peliculaId, tmdbId: Number.isNaN(tmdbId) ? null : tmdbId };
+  };
+
+  const loadRatings = async (movieData?: any) => {
+    try {
+      const ids = await resolveIdentifiers(movieData ?? movie);
+      // fetch average
+      if (ids.peliculaId) {
+        const res: any = await api.getRatingAverageByPelicula(ids.peliculaId);
+        if (res && res.success && res.data) {
+          setAvgRating(Number(res.data.average ?? 0));
+          setRatingsCount(Number(res.data.count ?? 0));
+        }
+      } else if (ids.tmdbId) {
+        const res: any = await api.getRatingAverageByTmdb(ids.tmdbId);
+        if (res && res.success && res.data) {
+          setAvgRating(Number(res.data.average ?? 0));
+          setRatingsCount(Number(res.data.count ?? 0));
+        }
+      }
+
+      // fetch user rating if authenticated
+      if (isAuthenticated) {
+        try {
+          const resUser: any = await api.getUserRating({ pelicula_id: ids.peliculaId ?? undefined, tmdb_id: ids.tmdbId ?? undefined });
+          if (resUser && resUser.success) {
+            const data = resUser.data;
+            setUserRating(data ? Number(data.rating) : null);
+          }
+        } catch (err) {
+          console.error('Error fetching user rating', err);
+        }
+      } else {
+        setUserRating(null);
+      }
+    } catch (err) {
+      console.error('Error loading ratings', err);
+    }
+  };
+
   const loadComments = async () => {
     try {
       setLoadingComments(true);
       const response: any = await api.getCommentsByMovie(movieId!);
       
       if (response.success && response.data) {
+        // expect response.data to be array of comments possibly with embedded users
         setComments(response.data);
       }
     } catch (err) {
@@ -109,10 +183,119 @@ const WatchMoviePage: React.FC = () => {
     }
   };
 
-  const handleRating = (star: number) => {
-    setUserRating(star);
-    // Aquí podrías guardar la calificación en el backend si tienes ese endpoint
-    console.log(`Usuario calificó con ${star} estrellas`);
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!currentUser?.id) {
+      alert('Debes iniciar sesión para eliminar tu comentario');
+      return;
+    }
+    if (!window.confirm('¿Seguro que quieres eliminar este comentario?')) return;
+
+    try {
+      const res: any = await api.deleteComment(commentId, currentUser.id);
+      if (res.success) {
+        setComments(prev => prev.filter(c => c.id !== commentId));
+      }
+    } catch (err: any) {
+      console.error('Error deleting comment', err);
+      alert(err.message || 'Error al eliminar comentario');
+    }
+  };
+
+  const startEditing = (c: Comment) => {
+    setEditingId(c.id);
+    setEditText(c.contenido);
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditText('');
+  };
+
+  const submitEdit = async (c: Comment) => {
+    if (!currentUser?.id) {
+      alert('Debes iniciar sesión para editar tu comentario');
+      return;
+    }
+    try {
+      const res: any = await api.updateComment(c.id, editText.trim(), currentUser.id);
+      if (res.success && res.data) {
+        setComments(prev => prev.map(p => p.id === c.id ? { ...p, ...res.data } : p));
+        cancelEditing();
+      }
+    } catch (err: any) {
+      console.error('Error updating comment', err);
+      alert(err.message || 'Error al actualizar comentario');
+    }
+  };
+
+  const handleRating = async (star: number) => {
+    // Validate
+    if (!Number.isInteger(star) || star < 1 || star > 5) return;
+
+    // If not authenticated, redirect to login
+    const token = localStorage.getItem('token');
+    if (!token) {
+      // show message and redirect
+      setRatingMessage('Inicia sesión para calificar');
+      setTimeout(() => setRatingMessage(null), 1800);
+      navigate('/login');
+      return;
+    }
+
+    if (savingRating) return; // debounce multiple clicks
+
+    // Determine identifiers and payload
+    const prev = userRating;
+    let peliculaIdToSend: string | null = null;
+    let tmdbIdToSend: number | null = null;
+    try {
+      // Try to resolve internal pelicula id from backend representation
+      const movieResp: any = await api.getMovieById(movieId!);
+      if (movieResp && movieResp.success && movieResp.data) {
+        // prefer backend/internal id when available and only if it's a UUID
+        const cand = movieResp.data.pelicula_id ?? movieResp.data.peliculaId ?? movieResp.data.movie_id ?? movieResp.data.id ?? null;
+        if (isUuid(cand)) peliculaIdToSend = String(cand);
+      }
+    } catch (err) {
+      // ignore and fallback
+      console.warn('No se pudo resolver pelicula_id, se usará tmdb id si aplica');
+    }
+    const tmdbCandidate = Number(movieId);
+    if (!peliculaIdToSend && !Number.isNaN(tmdbCandidate)) tmdbIdToSend = tmdbCandidate;
+
+    // Prepare payload, priority pelicula_id
+    const payload: any = { rating: star };
+    if (peliculaIdToSend) payload.pelicula_id = peliculaIdToSend;
+    if (!peliculaIdToSend && tmdbIdToSend) payload.tmdb_id = tmdbIdToSend;
+
+    try {
+      setSavingRating(true);
+      setUserRating(star); // optimistic for visual
+
+      await api.submitRating(payload);
+
+      // Refresh average from server (recommended)
+      await loadRatings();
+      // Do not show explicit "Guardando" or "Calificación guardada" messages per UX request
+    } catch (err: any) {
+      console.error('Error saving rating', err);
+      // Revert
+      setUserRating(prev);
+      const msg = String(err.message || err);
+      if (msg.includes('status: 401') || msg.includes('status: 403')) {
+        setRatingMessage('Inicia sesión para calificar');
+        setTimeout(() => setRatingMessage(null), 1800);
+        navigate('/login');
+      } else {
+        setRatingMessage('No se pudo guardar la calificación. Intenta de nuevo.');
+        setTimeout(() => setRatingMessage(null), 2500);
+      }
+    } finally {
+      setSavingRating(false);
+    }
   };
 
   const handleFavorite = async () => {
@@ -153,9 +336,22 @@ const WatchMoviePage: React.FC = () => {
         return;
       }
 
+      // Resolve the internal movie id expected by the backend.
+      // Some backends expect an internal UUID for pelicula_id while the route uses TMDB id.
+      let peliculaIdToSend: string = String(movieId);
+      try {
+        const movieResp: any = await api.getMovieById(movieId!);
+        if (movieResp && movieResp.success && movieResp.data) {
+          // prefer backend/internal id when available
+          peliculaIdToSend = String(movieResp.data.id ?? movieResp.data._id ?? peliculaIdToSend);
+        }
+      } catch (err) {
+        console.warn('Could not resolve internal movie id, falling back to route id', err);
+      }
+
       const response = await api.createComment({
         usuario_id: user.id,
-        pelicula_id: movieId!,
+        pelicula_id: peliculaIdToSend,
         contenido: comment.trim()
       });
 
@@ -179,9 +375,6 @@ const WatchMoviePage: React.FC = () => {
     return 'https://via.placeholder.com/300x450/8b5cf6/ffffff?text=Sin+Imagen';
   };
 
-  const getDefaultBackdrop = () => {
-    return 'https://via.placeholder.com/1280x720/8b5cf6/ffffff?text=Sin+Video';
-  };
 
   if (loading) {
     return (
@@ -253,20 +446,19 @@ const WatchMoviePage: React.FC = () => {
               {[1, 2, 3, 4, 5].map(star => (
                 <button
                   key={star}
-                  className={`star-btn${userRating >= star ? ' rated' : ''}`}
+                  className={`star-btn${(userRating !== null && (userRating ?? 0) >= star) ? ' rated' : ''}`}
                   onClick={() => handleRating(star)}
                   aria-label={`Calificación ${star} estrellas`}
+                  aria-pressed={userRating === star}
+                  disabled={savingRating}
                 >★</button>
               ))}
             </div>
-            {userRating > 0 && (
-              <span className="my-rating">Tu calificación: {userRating}</span>
-            )}
-            {movie.calificacion && (
-              <span className="my-rating">
-                TMDb: {movie.calificacion.toFixed(1)}/10
-              </span>
-            )}
+            <span className="my-rating">Tu calificación: {userRating ? String(userRating) : '—'}</span>
+            <span className="my-rating">Calificación: {avgRating.toFixed(1)} ({ratingsCount} {ratingsCount === 1 ? 'voto' : 'votos'})</span>
+          {ratingMessage && (
+            <div className="rating-message" style={{ marginTop: 6, color: '#9fe6a0' }}>{ratingMessage}</div>
+          )}
           </div>
 
           <button
@@ -336,10 +528,32 @@ const WatchMoviePage: React.FC = () => {
           <ul className="comments-list">
             {comments.map((c) => (
               <li key={c.id} className="comment-item">
-                <div style={{ fontSize: '0.85em', color: '#aaa', marginBottom: '0.25rem' }}>
-                  {new Date(c.created_at).toLocaleDateString()}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ fontSize: '0.85em', color: '#aaa', marginBottom: '0.25rem' }}>
+                    <strong style={{ color: '#fff' }}>{c.users ? `${c.users.nombres || ''} ${c.users.apellidos || ''}`.trim() : ''}</strong>
+                    <div style={{ fontSize: '0.75em', color: '#aaa' }}>{new Date(c.created_at).toLocaleString()}</div>
+                    {c.editado && <span style={{ fontSize: '0.75em', color: '#bbb', marginLeft: 8 }}> (editado)</span>}
+                  </div>
+                  {/* show edit/delete only for author's comments */}
+                  {currentUser?.id && (c.usuario_id === currentUser.id || c.users?.id === currentUser.id) && (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => startEditing(c)} className="btn-small">Editar</button>
+                      <button onClick={() => handleDeleteComment(c.id)} className="btn-small danger">Eliminar</button>
+                    </div>
+                  )}
                 </div>
-                {c.contenido}
+
+                {editingId === c.id ? (
+                  <div>
+                    <textarea value={editText} onChange={e => setEditText(e.target.value)} rows={3}></textarea>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                      <button onClick={() => submitEdit(c)} className="btn-small">Guardar</button>
+                      <button onClick={cancelEditing} className="btn-small">Cancelar</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 6 }}>{c.contenido}</div>
+                )}
               </li>
             ))}
           </ul>
