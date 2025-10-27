@@ -228,9 +228,13 @@ class ApiService {
     });
   }
   // metodo para mostrar trailer en WatchMoviePage
-async getMovieTrailer(id: string) {
-  return this.request(`/movies/${id}/trailer`, { method: 'GET' });
+async getMovieTrailer(movieId: string) {
+  return this.request(`/movies/${encodeURIComponent(movieId)}/trailer`, { 
+    method: 'GET' 
+  });
 }
+
+
 
   // ========== FAVORITOS ==========
   
@@ -342,6 +346,8 @@ async getMovieTrailer(id: string) {
   async getUsers() {
     return this.request('/users', { method: 'GET' });
   }
+
+
 }
 
 const api = new ApiService();
@@ -375,6 +381,7 @@ export const YouTubeService = {
     return null;
   },
 };
+
 
 
 export default api;
