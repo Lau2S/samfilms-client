@@ -40,7 +40,6 @@ const ProfilePage: React.FC = () => {
 
     const loadUserData = async () => {
         try {
-            // First try to get from localStorage
             const storedUser = localStorage.getItem('user');
             
             if (storedUser) {
@@ -49,7 +48,6 @@ const ProfilePage: React.FC = () => {
                 setUser(userData);
                 initializeForm(userData);
             } else {
-                // If not in localStorage, fetch from API
                 console.log('🔄 Obteniendo perfil desde API...');
                 const response = await api.getProfile();
                 
@@ -58,13 +56,11 @@ const ProfilePage: React.FC = () => {
                     console.log('👤 Usuario desde API:', apiUser);
                     setUser(apiUser);
                     initializeForm(apiUser);
-                    // Save to localStorage
                     localStorage.setItem('user', JSON.stringify(apiUser));
                 }
             }
         } catch (error) {
             console.error('❌ Error cargando usuario:', error);
-            // If there's an error, redirect to login
             navigate('/inicio-sesion');
         } finally {
             setLoading(false);
@@ -110,24 +106,19 @@ const ProfilePage: React.FC = () => {
     }, [editOpen, deleteOpen]);
 
     const handleSave = async () => {
-        // Validations
         if (newPassword && newPassword !== confirmPassword) {
-            //alert('❌ Las contraseñas no coinciden');
-            toast.error('Las contraseñas no coinciden'); //toast
+            toast.error('Las contraseñas no coinciden');
             return;
         }
 
         if (newPassword && newPassword.length < 8) {
-            //alert('❌ La contraseña debe tener al menos 8 caracteres');
-            toast.error('La contraseña debe tener al menos 8 caracteres'); //toast
+            toast.error('La contraseña debe tener al menos 8 caracteres');
             return;
         }
 
-        // Validate and normalize age
         const ageNum = age === '' ? undefined : Number(age);
         if (age !== '' && (isNaN(ageNum as number) || (ageNum as number) < 18 || (ageNum as number) > 120)) {
-            //alert('❌ Ingresa una edad válida entre 18 y 120');
-            toast.error('Ingresa una edad válida entre 18 y 120'); //toast
+            toast.error('Ingresa una edad válida entre 18 y 120');
             return;
         }
 
@@ -141,7 +132,6 @@ const ProfilePage: React.FC = () => {
 
         console.log('💾 Guardando cambios (payload):', updateData);
 
-        // Optimistic update: apply changes locally and save previous state for rollback
         const prevUser = user;
         const optimisticUser = (prev => ({
             ...(prev ?? {}),
@@ -153,7 +143,6 @@ const ProfilePage: React.FC = () => {
         }))(user);
 
         try {
-            // Apply optimistic change
             setUser(optimisticUser as UserData);
             localStorage.setItem('user', JSON.stringify(optimisticUser));
 
@@ -162,27 +151,22 @@ const ProfilePage: React.FC = () => {
             if (response.success) {
                 console.log('✅ Perfil actualizado en servidor:', response.data);
 
-                // If server returns the updated user, prefer it (keeps canonical data)
                 if (response.data) {
                     const serverUser = response.data as UserData;
                     setUser(serverUser);
                     localStorage.setItem('user', JSON.stringify(serverUser));
                 }
 
-                //alert('✅ Perfil actualizado exitosamente');
-                toast.success('Perfil actualizado correctamente'); //toast
+                toast.success('Perfil actualizado correctamente');
                 setEditOpen(false);
 
-                // Clear password fields
                 setNewPassword('');
                 setConfirmPassword('');
             } else {
-                // Server returned success=false: rollback
                 throw new Error(response.message || response.message_es || 'Error al actualizar');
             }
         } catch (error: any) {
             console.error('❌ Error actualizando perfil:', error);
-            // Rollback to previous user state
             setUser(prevUser);
             if (prevUser) localStorage.setItem('user', JSON.stringify(prevUser));
             alert('❌ Error al actualizar el perfil: ' + (error.message || 'Error desconocido'));
@@ -198,11 +182,9 @@ const ProfilePage: React.FC = () => {
             if (response.success) {
                 console.log('✅ Cuenta eliminada');
                 
-                // Clear all data
                 localStorage.removeItem('token');
                 localStorage.removeItem('user');
                 
-                //alert('✅ Cuenta eliminada exitosamente');
                 toast.success('Cuenta eliminada exitosamente');
                 navigate('/');
             }
@@ -219,7 +201,6 @@ const ProfilePage: React.FC = () => {
         }
     };
 
-    // Show loading state
     if (loading) {
         return (
             <div className="profile-page" style={{ 
@@ -228,25 +209,23 @@ const ProfilePage: React.FC = () => {
                 alignItems: 'center',
                 minHeight: '50vh'
             }}>
-                <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.7)' }}>
+                <p style={{ fontSize: '1.25rem', color: 'rgba(255,255,255,0.7)' }} role="status" aria-live="polite">
                     Cargando perfil...
                 </p>
             </div>
         );
     }
 
-    // Show error if no user
     if (!user) {
         return (
             <div className="profile-page">
-                <p style={{ textAlign: 'center', color: '#ff5252' }}>
+                <p style={{ textAlign: 'center', color: '#ff5252' }} role="alert">
                     ❌ No se pudo cargar el perfil del usuario
                 </p>
             </div>
         );
     }
 
-    // Get user data with fallbacks
     const displayName = user.firstName || user.nombres || 'Usuario';
     const displayLastName = user.lastName || user.apellidos || '';
     const displayEmail = user.email || user.correo || 'email@example.com';
@@ -255,67 +234,101 @@ const ProfilePage: React.FC = () => {
 
     return (
         <>
-            <div className="profile-page">
+            <main className="profile-page" role="main">
                 <div className="profile-header">
-                    <div className="profile-avatar">
-                        <span className="avatar-icon">
+                    <div 
+                        className="profile-avatar" 
+                        role="img" 
+                        
+                    >
+                        <span className="avatar-icon" aria-hidden="true">
                             {displayName.charAt(0).toUpperCase()}
                         </span>
                     </div>
-                    <h2 className="profile-name">{fullName}</h2>
+                    <h2 className="profile-name" id="profile-title">{fullName}</h2>
                 </div>
 
-                <div className="profile-details">
+                <section className="profile-details" >
                     <p><strong>Email:</strong> {displayEmail}</p>
                     <p><strong>Edad:</strong> {displayAge} años</p>
-                </div>
+                </section>
 
                 <div className="profile-actions">
-                    <button className="edit-button" onClick={() => setEditOpen(true)}>
+                    <button 
+                        className="edit-button" 
+                        onClick={() => setEditOpen(true)}
+                        aria-label="Abrir modal para editar perfil"
+                    >
                         Edita tu perfil
                     </button>
-                    <button className="delete-button" onClick={() => setDeleteOpen(true)}>
+                    <button 
+                        className="delete-button" 
+                        onClick={() => setDeleteOpen(true)}
+                        aria-label="Abrir modal para eliminar perfil"
+                    >
                         Elimina tu perfil
                     </button>
                 </div>
-            </div>
+            </main>
 
             {/* Edit Modal */}
             {editOpen && (
-                <div className="modal-overlay" onClick={handleOverlayClick}>
+                <div 
+                    className="modal-overlay" 
+                    onClick={handleOverlayClick}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="edit-modal-title"
+                >
                     <div className="modal-card edit-modal">
                         <button 
                             className="modal-close" 
                             onClick={() => setEditOpen(false)}
-                            aria-label="Cerrar modal"
+                            aria-label="Cerrar modal de edición"
                         >
                             ×
                         </button>
-                        <h3>Editar Usuario</h3>
+                        <h3 id="edit-modal-title">Editar Usuario</h3>
                         <p className="modal-sub">Modifica tu información personal</p>
                         
+                        <label htmlFor="name-input" className="visually-hidden">Nombre</label>
                         <input 
+                            id="name-input"
                             className="form-input" 
                             value={name} 
                             onChange={(e) => setName(e.target.value)} 
-                            placeholder="Nombre" 
+                            placeholder="Nombre"
+                            aria-required="true"
                         />
+                        
+                        <label htmlFor="lastname-input" className="visually-hidden">Apellido</label>
                         <input 
+                            id="lastname-input"
                             className="form-input" 
                             value={lastName} 
                             onChange={(e) => setLastName(e.target.value)} 
                             placeholder="Apellido"
+                            aria-required="true"
                         />
+                        
+                        <label htmlFor="email-input" className="visually-hidden">Email</label>
                         <input 
+                            id="email-input"
                             className="form-input" 
                             value={email} 
                             onChange={(e) => setEmail(e.target.value)} 
                             placeholder="Email"
                             type="email"
                             disabled
+                            aria-disabled="true"
+                            aria-describedby="email-hint"
                             style={{ opacity: 0.6, cursor: 'not-allowed' }}
                         />
+                        <span id="email-hint" className="visually-hidden">El email no se puede modificar</span>
+                        
+                        <label htmlFor="age-input" className="visually-hidden">Edad</label>
                         <input 
+                            id="age-input"
                             className="form-input" 
                             value={age} 
                             onChange={(e) => setAge(e.target.value)} 
@@ -323,20 +336,30 @@ const ProfilePage: React.FC = () => {
                             type="number"
                             min="18"
                             max="120"
+                            aria-required="true"
                         />
                         
                         <p className="modal-sub" style={{ marginTop: '1rem', marginBottom: '0.5rem' }}>
                             Cambiar contraseña (opcional)
                         </p>
                         
+                        <label htmlFor="new-password-input" className="visually-hidden">Nueva Contraseña</label>
                         <input 
+                            id="new-password-input"
                             className="form-input" 
                             type="password" 
                             placeholder="Nueva Contraseña (mín. 8 caracteres)"
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
+                            aria-describedby="password-requirements"
                         />
+                        <span id="password-requirements" className="visually-hidden">
+                            La contraseña debe tener al menos 8 caracteres
+                        </span>
+                        
+                        <label htmlFor="confirm-password-input" className="visually-hidden">Confirmar Contraseña</label>
                         <input 
+                            id="confirm-password-input"
                             className="form-input" 
                             type="password" 
                             placeholder="Confirma Nueva Contraseña"
@@ -358,22 +381,40 @@ const ProfilePage: React.FC = () => {
 
             {/* Delete Confirmation Modal */}
             {deleteOpen && (
-                <div className="modal-overlay" onClick={handleOverlayClick}>
+                <div 
+                    className="modal-overlay" 
+                    onClick={handleOverlayClick}
+                    role="alertdialog"
+                    aria-modal="true"
+                    aria-labelledby="delete-modal-title"
+                    aria-describedby="delete-modal-description"
+                >
                     <div className="modal-card delete-modal">
                         <button 
                             className="modal-close" 
                             onClick={() => setDeleteOpen(false)}
-                            aria-label="Cerrar modal"
+                            aria-label="Cerrar modal de confirmación"
                         >
                             ×
                         </button>
-                        <h3>Eliminar Usuario</h3>
-                        <p>Esta acción eliminará permanentemente tu cuenta y todos tus datos. Esta acción no se puede deshacer.</p>
+                        <h3 id="delete-modal-title">Eliminar Usuario</h3>
+                        <p id="delete-modal-description">
+                            Esta acción eliminará permanentemente tu cuenta y todos tus datos. 
+                            Esta acción no se puede deshacer.
+                        </p>
                         <div className="modal-actions">
-                            <button className="confirm-delete" onClick={handleConfirmDelete}>
+                            <button 
+                                className="confirm-delete" 
+                                onClick={handleConfirmDelete}
+                                aria-label="Confirmar eliminación de cuenta"
+                            >
                                 Eliminar
                             </button>
-                            <button className="cancel-delete" onClick={() => setDeleteOpen(false)}>
+                            <button 
+                                className="cancel-delete" 
+                                onClick={() => setDeleteOpen(false)}
+                                aria-label="Cancelar eliminación"
+                            >
                                 Cancelar
                             </button>
                         </div>

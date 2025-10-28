@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router";
 import api from "../../services/api";
+import { toast } from 'react-toastify';
 import "./DashboardNavbar.scss";
 
 interface SearchResult {
@@ -94,6 +95,7 @@ const DashboardNavbar: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    toast.success('Sesión cerrada');
     navigate("/");
   };
 
