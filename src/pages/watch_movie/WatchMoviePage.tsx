@@ -344,23 +344,36 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
       }
 
       // Resolve the internal movie id expected by the backend.
-      // Some backends expect an internal UUID for pelicula_id while the route uses TMDB id.
-      let peliculaIdToSend: string = String(movieId);
+      // Backend may expect an internal UUID as `pelicula_id` or a TMDB id as `tmdb_id`.
+      let payload: any = {
+        usuario_id: user.id,
+        contenido: comment.trim(),
+      };
+
       try {
         const movieResp: any = await api.getMovieById(movieId!);
         if (movieResp && movieResp.success && movieResp.data) {
-          // prefer backend/internal id when available
-          peliculaIdToSend = String(movieResp.data.id ?? movieResp.data._id ?? peliculaIdToSend);
+          // Prefer backend/internal id when available and it looks like a UUID
+          const cand = movieResp.data.pelicula_id ?? movieResp.data.peliculaId ?? movieResp.data.movie_id ?? movieResp.data.id ?? null;
+          if (cand && typeof cand === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(cand)) {
+            payload.pelicula_id = String(cand);
+          } else {
+            // Fallback: send tmdb_id as number (route param)
+            const tmdbCandidate = Number(movieId);
+            if (!Number.isNaN(tmdbCandidate)) payload.tmdb_id = tmdbCandidate;
+          }
+        } else {
+          // If we couldn't fetch movie details, at least send tmdb id (route)
+          const tmdbCandidate = Number(movieId);
+          if (!Number.isNaN(tmdbCandidate)) payload.tmdb_id = tmdbCandidate;
         }
       } catch (err) {
-        console.warn('Could not resolve internal movie id, falling back to route id', err);
+        console.warn('Could not resolve internal movie id, will send tmdb id as fallback', err);
+        const tmdbCandidate = Number(movieId);
+        if (!Number.isNaN(tmdbCandidate)) payload.tmdb_id = tmdbCandidate;
       }
 
-      const response = await api.createComment({
-        usuario_id: user.id,
-        pelicula_id: peliculaIdToSend,
-        contenido: comment.trim()
-      });
+      const response = await api.createComment(payload);
 
       if (response.success) {
         setComment('');

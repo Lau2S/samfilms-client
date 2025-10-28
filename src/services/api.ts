@@ -285,12 +285,22 @@ async getMovieTrailer(movieId: string) {
 
   async createComment(commentData: {
     usuario_id: string;
-    pelicula_id: string;
+    pelicula_id?: string;
+    tmdb_id?: number;
     contenido: string;
   }) {
+    // Build body so we can send either an internal pelicula_id (UUID) or a tmdb_id (number)
+    const body: any = {
+      usuario_id: commentData.usuario_id,
+      contenido: commentData.contenido,
+    };
+    if (commentData.pelicula_id) body.pelicula_id = commentData.pelicula_id;
+    // If pelicula_id not provided but tmdb_id is, send tmdb_id instead
+    if (!commentData.pelicula_id && typeof commentData.tmdb_id === 'number') body.tmdb_id = commentData.tmdb_id;
+
     return this.request('/comments', {
       method: 'POST',
-      body: JSON.stringify(commentData),
+      body: JSON.stringify(body),
     }, true);
   }
 
