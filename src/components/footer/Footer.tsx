@@ -13,6 +13,14 @@ const Footer: React.FC = () => {
     <footer>
       <p>©2025 SamFilms. Todos los derechos reservados.</p>
       <Link to="/mapa-sitio">Mapa del Sitio</Link>
+      <span className="footer-separator"> | </span>
+      <a 
+        href="/manual-usuario-samfilms.pdf" 
+        target="_blank" 
+        rel="noopener noreferrer"
+      >
+        Manual de Usuario
+      </a>
     </footer>
   );
 };
