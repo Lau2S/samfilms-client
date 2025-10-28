@@ -110,20 +110,26 @@ const CatalogPage: React.FC = () => {
       <div className="catalog-header">
         <h1 className="catalog-title">Catálogo de Películas</h1>
         <p className="catalog-subtitle">
-          {selectedGenre === 'all' 
-            ? 'Explora toda nuestra colección' 
-            : `Películas de ${GENRES.find(g => g.id === selectedGenre)?.name}`}
+          {selectedGenre === "all"
+            ? "Explora toda nuestra colección"
+            : `Películas de ${
+                GENRES.find((g) => g.id === selectedGenre)?.name
+              }`}
         </p>
       </div>
 
       {/* Genre Filter */}
-      <div className="genre-filter">
-        <div className="genre-filter-container">
+      <div className="genre-filter" aria-label="Filtrar por género">
+        <div className="genre-filter-container" role="group">
           {GENRES.map((genre) => (
             <button
               key={genre.id}
-              className={`genre-btn ${selectedGenre === genre.id ? 'active' : ''}`}
+              className={`genre-btn ${
+                selectedGenre === genre.id ? "active" : ""
+              }`}
               onClick={() => handleGenreChange(genre.id)}
+              aria-pressed={selectedGenre === genre.id}
+              aria-label={`Filtrar películas de género ${genre.name}`}
             >
               {genre.name}
             </button>
@@ -133,32 +139,55 @@ const CatalogPage: React.FC = () => {
 
       {/* Movies Grid */}
       {error ? (
-        <div className="error-state">
+        <div className="error-state" role="alert" aria-live="assertive">
           <p>❌ {error}</p>
-          <button onClick={loadMovies} className="retry-btn">
+          <button
+            onClick={loadMovies}
+            className="retry-btn"
+            aria-label="Reintentar carga de películas"
+          >
             Reintentar
           </button>
         </div>
       ) : movies.length > 0 ? (
-        <div className="catalog-grid">
+        <div
+          className="catalog-grid"
+          role="list"
+          aria-label="Catálogo de películas"
+        >
           {movies.map((movie) => (
             <div
               key={movie.id}
               className="catalog-movie-card"
+              role="button"
+              tabIndex={0}
+              aria-label={`Ver detalles de ${movie.nombre}, año ${getYear(
+                movie.fecha_lanzamiento
+              )}`}
               onClick={() => handleMovieClick(movie.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleMovieClick(movie.id);
+                }
+              }}
             >
               <img
                 src={movie.imagen_url || getDefaultPoster()}
-                alt={movie.nombre}
+                alt={`Póster de ${movie.nombre}${
+                  movie.sinopsis ? ": " + movie.sinopsis.substring(0, 100) : ""
+                }. Año ${getYear(movie.fecha_lanzamiento)}`}
                 className="catalog-poster"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = getDefaultPoster();
                 }}
               />
-              <div className="catalog-overlay">
+              <div className="catalog-overlay" aria-hidden="true">
                 <h3 className="catalog-movie-title">{movie.nombre}</h3>
                 <div className="catalog-movie-info">
-                  <span className="catalog-year">{getYear(movie.fecha_lanzamiento)}</span>
+                  <span className="catalog-year">
+                    {getYear(movie.fecha_lanzamiento)}
+                  </span>
                   {/* {movie.calificacion && (
                     <span className="catalog-rating">
                       ⭐ {movie.calificacion.toFixed(1)}
@@ -170,9 +199,13 @@ const CatalogPage: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="empty-state">
+        <div className="empty-state" role="status">
           <p>😔 No se encontraron películas en esta categoría</p>
-          <button onClick={() => handleGenreChange('all')} className="back-btn">
+          <button
+            onClick={() => handleGenreChange("all")}
+            className="back-btn"
+            aria-label="Ver todas las películas disponibles"
+          >
             Ver todas las películas
           </button>
         </div>

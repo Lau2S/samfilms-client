@@ -175,15 +175,15 @@ const MoviesPage: React.FC = () => {
     <div className="movies-page">
       {/* Hero Carousel */}
       <div className="hero-carousel">
-        <div 
-          className="carousel-track" 
+        <div
+          className="carousel-track"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {heroMovies.map((movie) => (
             <div key={movie.id} className="hero-slide">
-              <img 
-                src={movie.backdrop} 
-                alt={movie.title} 
+              <img
+                src={movie.backdrop}
+                alt={movie.title}
                 className="hero-image"
               />
               <div className="hero-content">
@@ -194,13 +194,31 @@ const MoviesPage: React.FC = () => {
           ))}
         </div>
 
-        <button className="carousel-arrow prev" onClick={prevSlide} aria-label="Anterior">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <button
+          className="carousel-arrow prev"
+          onClick={prevSlide}
+          aria-label="Anterior"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <button className="carousel-arrow next" onClick={nextSlide} aria-label="Siguiente">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <button
+          className="carousel-arrow next"
+          onClick={nextSlide}
+          aria-label="Siguiente"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <path d="M9 18l6-6-6-6" />
           </svg>
         </button>
@@ -209,7 +227,7 @@ const MoviesPage: React.FC = () => {
           {heroMovies.map((_, index) => (
             <button
               key={index}
-              className={`dot ${currentSlide === index ? 'active' : ''}`}
+              className={`dot ${currentSlide === index ? "active" : ""}`}
               onClick={() => goToSlide(index)}
               aria-label={`Ir a slide ${index + 1}`}
             />
@@ -224,19 +242,35 @@ const MoviesPage: React.FC = () => {
           <section className="genre-section">
             <div className="genre-header">
               <h2 className="genre-title">Populares</h2>
-              <button onClick={() => navigate('/catalogo')} className="view-all-btn">Ver Todos</button>
+              <button
+                onClick={() => navigate("/catalogo")}
+                className="view-all-btn"
+              >
+                Ver Todos
+              </button>
             </div>
             <div className="movies-grid">
               {popularMovies.map((movie) => (
-                <div 
-                  key={movie.id} 
+                <div
+                  key={movie.id}
                   className="movie-card"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver ${movie.nombre}, año ${getYear(
+                    movie.fecha_lanzamiento
+                  )}`}
                   onClick={() => handleMovieClick(movie.id)}
-                  style={{ cursor: 'pointer' }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleMovieClick(movie.id);
+                    }
+                  }}
+                  style={{ cursor: "pointer" }}
                 >
-                  <img 
-                    src={movie.imagen_url || getDefaultPoster()} 
-                    alt={movie.nombre} 
+                  <img
+                    src={movie.imagen_url || getDefaultPoster()}
+                    alt={movie.nombre}
                     className="movie-poster"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = getDefaultPoster();
@@ -244,7 +278,9 @@ const MoviesPage: React.FC = () => {
                   />
                   <div className="movie-overlay">
                     <h3 className="movie-title">{movie.nombre}</h3>
-                    <p className="movie-year">{getYear(movie.fecha_lanzamiento)}</p>
+                    <p className="movie-year">
+                      {getYear(movie.fecha_lanzamiento)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -257,19 +293,35 @@ const MoviesPage: React.FC = () => {
           <section className="genre-section">
             <div className="genre-header">
               <h2 className="genre-title">Comedia</h2>
-              <button onClick={() => navigate('/catalogo?genero=Comedia')} className="view-all-btn">Ver Todos</button>
+              <button
+                onClick={() => navigate("/catalogo?genero=Comedia")}
+                className="view-all-btn"
+              >
+                Ver Todos
+              </button>
             </div>
             <div className="movies-grid">
               {comedyMovies.map((movie) => (
-                <div 
-                  key={movie.id} 
+                <div
+                  key={movie.id}
                   className="movie-card"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver ${movie.nombre}, año ${getYear(
+                    movie.fecha_lanzamiento
+                  )}`}
                   onClick={() => handleMovieClick(movie.id)}
-                  style={{ cursor: 'pointer' }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleMovieClick(movie.id);
+                    }
+                  }}
+                  style={{ cursor: "pointer" }}
                 >
-                  <img 
-                    src={movie.imagen_url || getDefaultPoster()} 
-                    alt={movie.nombre} 
+                  <img
+                    src={movie.imagen_url || getDefaultPoster()}
+                    alt={movie.nombre}
                     className="movie-poster"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = getDefaultPoster();
@@ -277,7 +329,9 @@ const MoviesPage: React.FC = () => {
                   />
                   <div className="movie-overlay">
                     <h3 className="movie-title">{movie.nombre}</h3>
-                    <p className="movie-year">{getYear(movie.fecha_lanzamiento)}</p>
+                    <p className="movie-year">
+                      {getYear(movie.fecha_lanzamiento)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -290,19 +344,35 @@ const MoviesPage: React.FC = () => {
           <section className="genre-section">
             <div className="genre-header">
               <h2 className="genre-title">Acción</h2>
-              <button onClick={() => navigate('/catalogo?genero=Acción')} className="view-all-btn">Ver Todos</button>
+              <button
+                onClick={() => navigate("/catalogo?genero=Acción")}
+                className="view-all-btn"
+              >
+                Ver Todos
+              </button>
             </div>
             <div className="movies-grid">
               {actionMovies.map((movie) => (
-                <div 
-                  key={movie.id} 
+                <div
+                  key={movie.id}
                   className="movie-card"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver ${movie.nombre}, año ${getYear(
+                    movie.fecha_lanzamiento
+                  )}`}
                   onClick={() => handleMovieClick(movie.id)}
-                  style={{ cursor: 'pointer' }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleMovieClick(movie.id);
+                    }
+                  }}
+                  style={{ cursor: "pointer" }}
                 >
-                  <img 
-                    src={movie.imagen_url || getDefaultPoster()} 
-                    alt={movie.nombre} 
+                  <img
+                    src={movie.imagen_url || getDefaultPoster()}
+                    alt={movie.nombre}
                     className="movie-poster"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = getDefaultPoster();
@@ -310,7 +380,9 @@ const MoviesPage: React.FC = () => {
                   />
                   <div className="movie-overlay">
                     <h3 className="movie-title">{movie.nombre}</h3>
-                    <p className="movie-year">{getYear(movie.fecha_lanzamiento)}</p>
+                    <p className="movie-year">
+                      {getYear(movie.fecha_lanzamiento)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -323,19 +395,35 @@ const MoviesPage: React.FC = () => {
           <section className="genre-section">
             <div className="genre-header">
               <h2 className="genre-title">Thriller</h2>
-              <button onClick={() => navigate('/catalogo?genero=Suspense')} className="view-all-btn">Ver Todos</button>
+              <button
+                onClick={() => navigate("/catalogo?genero=Suspense")}
+                className="view-all-btn"
+              >
+                Ver Todos
+              </button>
             </div>
             <div className="movies-grid">
               {thrillerMovies.map((movie) => (
-                <div 
-                  key={movie.id} 
+                <div
+                  key={movie.id}
                   className="movie-card"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Ver ${movie.nombre}, año ${getYear(
+                    movie.fecha_lanzamiento
+                  )}`}
                   onClick={() => handleMovieClick(movie.id)}
-                  style={{ cursor: 'pointer' }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleMovieClick(movie.id);
+                    }
+                  }}
+                  style={{ cursor: "pointer" }}
                 >
-                  <img 
-                    src={movie.imagen_url || getDefaultPoster()} 
-                    alt={movie.nombre} 
+                  <img
+                    src={movie.imagen_url || getDefaultPoster()}
+                    alt={movie.nombre}
                     className="movie-poster"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = getDefaultPoster();
@@ -343,7 +431,9 @@ const MoviesPage: React.FC = () => {
                   />
                   <div className="movie-overlay">
                     <h3 className="movie-title">{movie.nombre}</h3>
-                    <p className="movie-year">{getYear(movie.fecha_lanzamiento)}</p>
+                    <p className="movie-year">
+                      {getYear(movie.fecha_lanzamiento)}
+                    </p>
                   </div>
                 </div>
               ))}

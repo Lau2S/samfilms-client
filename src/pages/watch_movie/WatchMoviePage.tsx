@@ -133,6 +133,15 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
 
   const loadRatings = async (movieData?: any) => {
     try {
+      // Quick local cache check so the user's rating appears immediately after reload
+      try {
+        const cached = localStorage.getItem(`rating_${movieId}`);
+        if (cached !== null) {
+          setUserRating(Number(cached));
+        }
+      } catch (e) {
+        // ignore storage errors
+      }
       const ids = await resolveIdentifiers(movieData ?? movie);
       // fetch average
       if (ids.peliculaId) {
@@ -155,13 +164,23 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
           const resUser: any = await api.getUserRating({ pelicula_id: ids.peliculaId ?? undefined, tmdb_id: ids.tmdbId ?? undefined });
           if (resUser && resUser.success) {
             const data = resUser.data;
-            setUserRating(data ? Number(data.rating) : null);
+            // Only overwrite cached value if server explicitly provides a user rating
+            if (data && typeof data.rating !== 'undefined' && data.rating !== null) {
+              setUserRating(Number(data.rating));
+              try {
+                localStorage.setItem(`rating_${movieId}`, String(data.rating));
+              } catch (e) {
+                // ignore storage errors
+              }
+            }
           }
         } catch (err) {
           console.error('Error fetching user rating', err);
+          // don't clear the cached rating on fetch error
         }
       } else {
-        setUserRating(null);
+        // If user is not authenticated, keep any cached rating so it persists after reload
+        // Do not clear userRating here
       }
     } catch (err) {
       console.error('Error loading ratings', err);
@@ -187,24 +206,55 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
 
+  const [commentDeleteOpen, setCommentDeleteOpen] = useState(false);
+  const [commentToDelete, setCommentToDelete] = useState<string | null>(null);
   const handleDeleteComment = async (commentId: string) => {
     if (!currentUser?.id) {
-      //alert('Debes iniciar sesión para eliminar tu comentario');
       toast.error('Debes iniciar sesión para eliminar tu comentario')
       return;
     }
-    if (!window.confirm('¿Seguro que quieres eliminar este comentario?')) return;
+
+  // Open confirmation modal instead of native confirm
+  setCommentToDelete(commentId);
+  setCommentDeleteOpen(true);
+  };
+
+  // Prevent body scroll when small delete modal is open
+  useEffect(() => {
+    if (commentDeleteOpen) document.body.classList.add('modal-open');
+    else document.body.classList.remove('modal-open');
+    return () => { document.body.classList.remove('modal-open'); };
+  }, [commentDeleteOpen]);
+
+  const handleConfirmDeleteComment = async () => {
+    if (!currentUser?.id || !commentToDelete) {
+      setCommentDeleteOpen(false);
+      setCommentToDelete(null);
+      return;
+    }
 
     try {
-      const res: any = await api.deleteComment(commentId, currentUser.id);
+      const res: any = await api.deleteComment(commentToDelete, currentUser.id);
       if (res.success) {
-        setComments(prev => prev.filter(c => c.id !== commentId));
+        setComments(prev => prev.filter(c => c.id !== commentToDelete));
+        toast.success('Comentario eliminado correctamente');
+      } else {
+        toast.error(res.message || 'Error al eliminar comentario');
       }
     } catch (err: any) {
       console.error('Error deleting comment', err);
-      alert(err.message || 'Error al eliminar comentario');
+      toast.error(err.message || 'Error al eliminar comentario');
+    } finally {
+      setCommentDeleteOpen(false);
+      setCommentToDelete(null);
     }
   };
+
+  const handleCancelDeleteComment = () => {
+    setCommentDeleteOpen(false);
+    setCommentToDelete(null);
+  };
+
 
   const startEditing = (c: Comment) => {
     setEditingId(c.id);
@@ -280,8 +330,16 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
 
       await api.submitRating(payload);
 
+      // persist locally so it shows immediately after reload even if backend lookup lags
+      try {
+        localStorage.setItem(`rating_${movieId}`, String(star));
+      } catch (e) {
+        // ignore
+      }
+
       // Refresh average from server (recommended)
       await loadRatings();
+      toast.success('Calificación guardada');
       // Do not show explicit "Guardando" or "Calificación guardada" messages per UX request
     } catch (err: any) {
       console.error('Error saving rating', err);
@@ -296,6 +354,7 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
         setRatingMessage('No se pudo guardar la calificación. Intenta de nuevo.');
         setTimeout(() => setRatingMessage(null), 2500);
       }
+      toast.error('No se pudo guardar la calificación');
     } finally {
       setSavingRating(false);
     }
@@ -377,11 +436,12 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
       if (response.success) {
         setComment('');
         loadComments(); // Recargar comentarios
+        toast.success('Comentario agregado correctamente');
         console.log('✅ Comentario agregado');
       }
     } catch (err: any) {
       console.error('❌ Error al agregar comentario:', err);
-      alert(err.message || 'Error al agregar comentario');
+      toast.error(err.message || 'Error al agregar comentario');
     }
   };
 
@@ -495,13 +555,40 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
           )}
           </div>
 
-          <button
-            className={`fav-btn${isFavorite ? ' fav' : ''}`}
-            onClick={handleFavorite}
-            disabled={loadingFavorite}
-          >
-            {loadingFavorite ? 'Cargando...' : (isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos')}
-          </button>
+          <div className="action-row">
+            <button
+              className={`fav-btn${isFavorite ? ' fav' : ''}`}
+              onClick={handleFavorite}
+              disabled={loadingFavorite}
+            >
+              {loadingFavorite ? 'Cargando...' : (isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos')}
+            </button>
+
+            {/* Delete rating button placed next to favorites and using same visual style. Visible only when user has a rating. */}
+            {isAuthenticated && userRating !== null && (
+              <button
+                className={`fav-btn delete-rating`}
+                onClick={async () => {
+                  try {
+                    // Resolve identifiers (prefer internal pelicula_id)
+                    const ids = await resolveIdentifiers(movie);
+                    const delPayload: any = {};
+                    if (ids.peliculaId) delPayload.pelicula_id = ids.peliculaId;
+                    else if (ids.tmdbId) delPayload.tmdb_id = ids.tmdbId;
+
+                    await api.deleteRating(delPayload);
+                    try { localStorage.removeItem(`rating_${movieId}`); } catch (e) {}
+                    setUserRating(null);
+                    await loadRatings(movie);
+                    toast.success('Calificación eliminada');
+                  } catch (err: any) {
+                    console.error('Error deleting rating', err);
+                    toast.error(err?.message || 'No se pudo eliminar la calificación');
+                  }
+                }}
+              >Eliminar calificación</button>
+            )}
+          </div>
 
           <p>Año: {getYear(movie.fecha_lanzamiento)}</p>
           {movie.genero_ids && movie.genero_ids.length > 0 && (
@@ -592,6 +679,19 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
           </p>
         )}
       </div>
+      {commentDeleteOpen && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) handleCancelDeleteComment(); }}>
+          <div className="modal-card comment-delete-modal">
+            <button className="modal-close" onClick={handleCancelDeleteComment} aria-label="Cerrar modal">×</button>
+            <h3>Eliminar comentario</h3>
+            <p>¿Seguro que quieres eliminar este comentario?</p>
+            <div className="modal-actions">
+              <button className="confirm-delete" onClick={handleConfirmDeleteComment}>Eliminar</button>
+              <button className="cancel-delete" onClick={handleCancelDeleteComment}>Cancelar</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
