@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import api from '../../services/api';
 import './MoviesPage.scss';
-import CatalogPage from '../catalog/CatalogMoviesPage';
 
 interface Movie {
   id: number;

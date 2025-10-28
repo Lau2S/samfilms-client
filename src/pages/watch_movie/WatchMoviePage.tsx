@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParams, useNavigate } from 'react-router';
-import api, {YouTubeService} from '../../services/api';
+import api  from '../../services/api';
 import { toast } from 'react-toastify';
-
 import './WatchMoviePage.scss';
+
 
 interface Movie {
   id: number;
@@ -37,7 +37,6 @@ const WatchMoviePage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
   // Ratings state
   const [avgRating, setAvgRating] = useState<number>(0);
   const [ratingsCount, setRatingsCount] = useState<number>(0);
@@ -454,6 +453,21 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
   const getDefaultPoster = () => {
     return 'https://via.placeholder.com/300x450/8b5cf6/ffffff?text=Sin+Imagen';
   };
+  
+  const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
+
+  // Load Vimeo player API only when we have a trailer URL
+  useEffect(() => {
+    if (!trailerUrl) return;
+    const id = 'vimeo-player-js';
+    if (document.getElementById(id)) return;
+    const script = document.createElement('script');
+    script.id = id;
+    script.src = 'https://player.vimeo.com/api/player.js';
+    script.async = true;
+    document.body.appendChild(script);
+    // keep script in DOM to avoid reloading on fast toggles
+  }, [trailerUrl]);
 
 
   if (loading) {
@@ -586,22 +600,26 @@ if (trailerRes.success && typeof trailerRes.data === 'string') {
        {/* 🎬 TRAILER */}
 <div className="movie-player">
   {trailerUrl ? (
-    <video
-      controls
-      autoPlay
-      loop
-      muted
-      playsInline
-      className="movie-frame"
-    >
-      <source src={trailerUrl} type="video/mp4" />
-      Tu navegador no soporta video HTML5.
-    </video>
+    <div style={{ padding: "56.25% 0 0 0", position: "relative" }}>
+      <iframe
+        src="https://player.vimeo.com/video/1131425612?title=0&byline=0&portrait=0&badge=0&autopause=0"
+        frameBorder="0"
+        allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+        referrerPolicy="strict-origin-when-cross-origin"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+        }}
+        title="cmia"
+      ></iframe>
+    </div>
   ) : (
     <div className="fallback">🎬 Tráiler no disponible</div>
   )}
 </div>
-
 
       <div className="comments-section">
         <h2>Comentarios</h2>
