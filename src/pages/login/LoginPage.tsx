@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router";
 import api from "../../services/api";
 import "./LoginPage.scss";
+import { toast } from 'react-toastify';
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ const LoginPage: React.FC = () => {
       if (result && result.success && result.data) {
         localStorage.setItem("token", result.data.token);
         localStorage.setItem("user", JSON.stringify(result.data.user));
+        toast.success('Sesión iniciada correctamente');
         navigate("/peliculas");
         return;
       }

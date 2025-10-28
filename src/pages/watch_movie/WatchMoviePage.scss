@@ -412,3 +412,67 @@ $color-text-muted: rgba(255, 255, 255, 0.7);
     }
   }
 }
+
+/* Small confirmation modal for deleting comments */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.modal-card.comment-delete-modal {
+  background: rgba(26, 26, 31, 0.98);
+  border-radius: 12px;
+  padding: 1.25rem;
+  max-width: 360px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+  position: relative;
+  color: #fff;
+}
+
+.modal-card.comment-delete-modal h3 {
+  font-size: 1.15rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.modal-card.comment-delete-modal p {
+  font-size: 0.95rem;
+  color: rgba(255,255,255,0.85);
+  text-align: center;
+  margin-bottom: 0.75rem;
+}
+
+.modal-card.comment-delete-modal .modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.modal-card.comment-delete-modal .confirm-delete,
+.modal-card.comment-delete-modal .cancel-delete {
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* prevent body scroll when modal-open class applied */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* action row to hold favorite and delete-rating buttons side-by-side */
+.action-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import "./RegisterPage.scss";
+import { toast } from 'react-toastify';
 import { Link } from "react-router";
 import api from "../../services/api.ts";
 
@@ -68,11 +69,11 @@ const RegisterPage: React.FC = () => {
       });
 
       if (result.success) {
-        alert("Registro exitoso");
+        toast.success('Cuenta creada correctamente');
         navigate("/inicio-sesion");
       }
     } catch (error: any) {
-      alert(error.message || "Error al registrar");
+      toast.error(error.message || "Error al registrar");
     }
   };
 

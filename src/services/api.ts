@@ -351,6 +351,55 @@ async getMovieTrailer(movieId: string) {
     }, true);
   }
 
+  // Delete a rating. Send either pelicula_id (UUID) or tmdb_id (number) in the body.
+  async deleteRating(data: { pelicula_id?: string | null; tmdb_id?: number | null }) {
+    const body: any = {};
+    if (data.pelicula_id) body.pelicula_id = data.pelicula_id;
+    if (data.tmdb_id) body.tmdb_id = data.tmdb_id;
+
+    // Try primary contract: DELETE /ratings with JSON body
+    try {
+      return await this.request('/ratings', {
+        method: 'DELETE',
+        body: JSON.stringify(body),
+      }, true);
+    } catch (err: any) {
+      // If endpoint not found (404) or server doesn't accept DELETE body, try fallbacks
+      const isNotFound = String(err.message || '').includes('status: 404') || String(err).includes('404');
+      if (!isNotFound) throw err;
+
+      // 1) Try DELETE with query params: /ratings?tmdb_id=... or /ratings?pelicula_id=...
+      try {
+        if (data.tmdb_id) {
+          return await this.request(`/ratings?tmdb_id=${data.tmdb_id}`, { method: 'DELETE' }, true);
+        }
+        if (data.pelicula_id) {
+          return await this.request(`/ratings?pelicula_id=${encodeURIComponent(data.pelicula_id)}`, { method: 'DELETE' }, true);
+        }
+      } catch (err2: any) {
+        // continue to next fallback
+      }
+
+      // 2) Try to fetch the user's rating record and delete by its id (DELETE /ratings/{id})
+      try {
+  const userRatingRes: any = await this.getUserRating({ tmdb_id: typeof data.tmdb_id === 'number' ? data.tmdb_id : undefined, pelicula_id: data.pelicula_id ?? undefined });
+        if (userRatingRes && userRatingRes.success && userRatingRes.data) {
+          // backend might return the rating object directly or under data
+          const ratingObj = userRatingRes.data;
+          const ratingId = ratingObj.id ?? ratingObj._id ?? ratingObj.rating_id ?? null;
+          if (ratingId) {
+            return await this.request(`/ratings/${ratingId}`, { method: 'DELETE' }, true);
+          }
+        }
+      } catch (err3: any) {
+        // fall through
+      }
+
+      // If all fallbacks fail, rethrow the original error
+      throw err;
+    }
+  }
+
   // ========== USUARIOS (ADMIN / listado público si aplica) ==========
 
   async getUsers() {
